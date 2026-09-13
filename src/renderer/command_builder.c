@@ -168,7 +168,7 @@ static inline unsigned
 command_for_shadow(struct layer *layer, struct backend_command *cmd,
                    const struct x_monitors *monitors, const struct backend_command *end) {
 	auto w = layer->win;
-	if (!layer->options.shadow) {
+	if (!layer->options.shadow || layer->opacity <= 0.05f) {
 		return 0;
 	}
 
@@ -249,7 +249,8 @@ command_for_blur(struct layer *layer, struct backend_command *cmd,
                  const region_t *frame_region, bool force_blend, bool blur_frame) {
 	auto w = layer->win;
 	auto mode = win_calc_mode_raw(w);
-	if (!layer->options.blur_background || layer->blur_opacity == 0) {
+	if (!layer->options.blur_background || layer->blur_opacity == 0 ||
+	    layer->opacity <= 0.05f) {
 		return 0;
 	}
 	if (force_blend || mode == WMODE_TRANS || layer->opacity < 1.0) {
@@ -450,12 +451,13 @@ void command_builder_build(struct command_builder *cb, struct layout *layout,
 	dynarr_foreach(layout->layers, layer) {
 		auto mode = win_calc_mode_raw(layer->win);
 		if (layer->options.blur_background && layer->blur_opacity != 0 &&
+		    layer->opacity > 0.05f &&
 		    (force_blend || mode == WMODE_TRANS || layer->opacity < 1.0 ||
 		     (blur_frame && mode == WMODE_FRAME_TRANS))) {
 			// Needs blur
 			ncmds += 1;
 		}
-		if (layer->options.shadow) {
+		if (layer->options.shadow && layer->opacity > 0.05f) {
 			ncmds += 1;
 		}
 

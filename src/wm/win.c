@@ -794,6 +794,18 @@ static void win_determine_shadow(session_t *ps, struct win *w) {
 		log_debug("Shadow disabled by shadow property");
 		w->options.shadow = TRI_FALSE;
 	}
+	auto lowest_wintype = index_of_lowest_one(w->window_types);
+	if (lowest_wintype == WINTYPE_POPUP_MENU ||
+	    lowest_wintype == WINTYPE_DROPDOWN_MENU ||
+	    lowest_wintype == WINTYPE_MENU ||
+	    lowest_wintype == WINTYPE_TOOLTIP ||
+	    lowest_wintype == WINTYPE_NOTIFICATION ||
+	    lowest_wintype == WINTYPE_DIALOG ||
+	    (lowest_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
+	    w->a.override_redirect) {
+		log_debug("Shadow disabled for overlay window type %#x", lowest_wintype);
+		w->options.shadow = TRI_FALSE;
+	}
 }
 
 /**
@@ -907,6 +919,18 @@ static void win_determine_blur_background(session_t *ps, struct win *w) {
 			log_debug("Blur background disabled by blur-background-exclude");
 			w->options.blur_background = TRI_FALSE;
 		}
+	}
+	auto lowest_wintype = index_of_lowest_one(w->window_types);
+	if (lowest_wintype == WINTYPE_POPUP_MENU ||
+	    lowest_wintype == WINTYPE_DROPDOWN_MENU ||
+	    lowest_wintype == WINTYPE_MENU ||
+	    lowest_wintype == WINTYPE_TOOLTIP ||
+	    lowest_wintype == WINTYPE_NOTIFICATION ||
+	    lowest_wintype == WINTYPE_DIALOG ||
+	    (lowest_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
+	    w->a.override_redirect) {
+		log_debug("Blur background disabled for overlay window type %#x", lowest_wintype);
+		w->options.blur_background = TRI_FALSE;
 	}
 }
 
