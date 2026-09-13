@@ -417,6 +417,8 @@ void win_release_saved_win_image(backend_t *base, struct win *w);
 /// Release images bound with a window, set the *_NONE flags on the window. Only to be
 /// used when de-initializing the backend outside of win.c
 void win_release_images(struct backend_base *backend, struct win *w);
+/// Check if a window is a game (matches game-class rules or built-in detection).
+bool win_is_game(session_t *ps, struct win *w);
 winmode_t attr_pure win_calc_mode_raw(const struct win *w);
 // TODO(yshui) `win_calc_mode` is only used by legacy backends
 winmode_t attr_pure win_calc_mode(const struct win *w);

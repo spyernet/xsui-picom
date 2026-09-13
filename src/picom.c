@@ -686,13 +686,16 @@ static bool paint_preprocess(session_t *ps, bool *animation, struct win **out_bo
 		}
 
 		if (win_has_frame(w)) {
-			w->frame_opacity = ps->o.frame_opacity;
+			w->frame_opacity = win_is_game(ps, w) ? 1.0 : ps->o.frame_opacity;
 		} else {
 			w->frame_opacity = 1.0;
 		}
 
 		// Update window mode
 		w->mode = win_calc_mode(w);
+		if (win_is_game(ps, w)) {
+			w->mode = WMODE_SOLID;
+		}
 	}
 
 	// Opacity will not change, from this point onwards.
@@ -2053,7 +2056,8 @@ static session_t *session_init(int argc, char **argv, Display *dpy,
 		goto err;
 	}
 
-	show_config_warning_message_box(&ps->o);
+	// Warnings are logged only, no popup overlay.
+	// show_config_warning_message_box(&ps->o);
 
 	const char *basename = strrchr(argv[0], '/') ? strrchr(argv[0], '/') + 1 : argv[0];
 
@@ -2090,7 +2094,7 @@ static session_t *session_init(int argc, char **argv, Display *dpy,
 	}
 
 if (strstr(argv[0], "compton")) {
-		log_warn("This compositor has been renamed to \"picom\", the \"compton\" "
+		log_debug("This compositor has been renamed to \"picom\", the \"compton\" "
                          "binary will not be installed in the future.");
 	}
 

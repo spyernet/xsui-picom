@@ -652,7 +652,7 @@ bool parse_config(options_t *opt, const char *config_file) {
 	    .detect_rounded_corners = false,
 	    .resize_damage = 0,
 	    .unredir_if_possible = false,
-	    .game_mode = false,
+	    .game_mode = true,
 	    .game_class_blacklist = NULL,
 	    .unredir_if_possible_blacklist = NULL,
 	    .unredir_if_possible_delay = 0,

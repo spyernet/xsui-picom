@@ -851,15 +851,38 @@ static void win_determine_invert_color(session_t *ps, struct win *w) {
 /**
  * Determine if a window should have background blurred.
  */
-static bool win_is_game(session_t *ps, struct win *w) {
+bool win_is_game(session_t *ps, struct win *w) {
 	if (!ps->o.game_mode) {
 		return false;
 	}
-	// If no game-class rules are configured, fall back to fullscreen detection.
-	if (list_is_empty(&ps->o.game_class_blacklist)) {
-		return w->is_fullscreen;
+	// If game-class rules are configured, use them.
+	if (!list_is_empty(&ps->o.game_class_blacklist)) {
+		return c2_match(ps->c2_state, w, &ps->o.game_class_blacklist, NULL);
 	}
-	return c2_match(ps->c2_state, w, &ps->o.game_class_blacklist, NULL);
+	// Built-in detection for common game engines: Proton, Steam, Wine, native.
+	if (w->class_instance) {
+		if (fnmatch("proton", w->class_instance, 0) == 0 ||
+		    fnmatch("steam", w->class_instance, 0) == 0 ||
+		    fnmatch("wine", w->class_instance, 0) == 0 ||
+		    fnmatch("wine64", w->class_instance, 0) == 0 ||
+		    fnmatch("xash3d", w->class_instance, 0) == 0 ||
+		    fnmatch("hl2", w->class_instance, 0) == 0 ||
+		    fnmatch("csgo", w->class_instance, 0) == 0 ||
+		    fnmatch("dota2", w->class_instance, 0) == 0 ||
+		    fnmatch("hl", w->class_instance, 0) == 0) {
+			return true;
+		}
+	}
+	if (w->class_general) {
+		if (fnmatch("Proton", w->class_general, 0) == 0 ||
+		    fnmatch("Steam", w->class_general, 0) == 0 ||
+		    fnmatch("Wine", w->class_general, 0) == 0 ||
+		    fnmatch("Steam", w->class_general, 0) == 0) {
+			return true;
+		}
+	}
+	// Fall back to fullscreen detection.
+	return w->is_fullscreen;
 }
 
 static void win_determine_blur_background(session_t *ps, struct win *w) {
@@ -1072,7 +1095,18 @@ void win_on_factor_change(session_t *ps, struct win *w) {
 		w->opacity = win_options(w).opacity;
 	}
 
+	// Game mode: force solid mode and full opacity for game windows,
+	// bypassing any user-configured rules.
+	if (win_is_game(ps, w)) {
+		w->options.blur_background = TRI_FALSE;
+		w->mode = WMODE_SOLID;
+		w->opacity = 1.0;
+	}
+
 	w->mode = win_calc_mode(w);
+	if (win_is_game(ps, w)) {
+		w->mode = WMODE_SOLID;
+	}
 	log_debug("Window mode changed to %d", w->mode);
 
 	if (ps->debug_window != XCB_NONE &&
