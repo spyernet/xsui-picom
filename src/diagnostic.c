@@ -10,10 +10,10 @@
 #include "common.h"
 #include "config.h"
 #include "diagnostic.h"
-#include "picom.h"
+#include "xsui-picom.h"
 
 void print_diagnostics(session_t *ps, const char *config_file, bool compositor_running) {
-	printf("**Version:** " PICOM_FULL_VERSION "\n");
+	printf("**Version:** " XSUI_PICOM_FULL_VERSION "\n");
 	// printf("**CFLAGS:** %s\n", "??");
 	printf("\n### X extensions:\n\n");
 	printf("* GLX: %s\n", ps->c.e.has_glx ? "present" : "absent");

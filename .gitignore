@@ -10,7 +10,7 @@ depcomp
 install-sh
 missing
 stamp-h1
-compton
+xsui-picom
 *.o
 *.d
 build/
@@ -23,9 +23,9 @@ build.ninja
 .cache
 
 # CMake files
-compton-*.deb
-compton-*.rpm
-compton-*.tar.bz2
+xsui-picom-*.deb
+xsui-picom-*.rpm
+xsui-picom-*.tar.bz2
 release/
 _CPack_Packages/
 CMakeCache.txt
@@ -62,7 +62,7 @@ core.*
 vgcore.*
 .gdb_history
 oprofile_data/
-compton.plist
+xsui-picom.plist
 callgrind.out.*
 man/*.html
 man/*.1
@@ -70,7 +70,7 @@ man/*.1
 .ycm_extra_conf.py
 .ycm_extra_conf.pyc
 /src/backtrace-symbols.[ch]
-/compton*.trace
+/xsui-picom*.trace
 *.orig
 /tests/log
 /tests/testcases/__pycache__/

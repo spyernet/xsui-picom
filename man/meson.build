@@ -1,4 +1,4 @@
-mans = ['picom.1', 'picom-inspect.1', 'picom-trans.1']
+mans = ['xsui-picom.1', 'xsui-picom-inspect.1', 'xsui-picom-trans.1']
 if get_option('with_docs')
 	a2x = find_program('asciidoctor')
 	foreach m : mans
@@ -8,7 +8,7 @@ if get_option('with_docs')
 			input: [m + '.adoc'],
 			command: [
 				a2x,
-				'-a', 'picom-version=v' + meson.project_version(),
+				'-a', 'xsui-picom-version=v' + meson.project_version(),
 				'--backend', 'manpage',
 				'@INPUT@',
 				'-D', meson.current_build_dir(),
@@ -22,12 +22,12 @@ if get_option('with_docs')
 			input: [m + '.adoc'],
 			command: [
 				a2x,
-				'-a', 'picom-version=v' + meson.project_version(),
+				'-a', 'xsui-picom-version=v' + meson.project_version(),
 				'--backend', 'html',
 				'@INPUT@',
 				'-D', meson.current_build_dir(),
 			],
-			install_dir: get_option('datadir') / 'doc' / 'picom',
+			install_dir: get_option('datadir') / 'doc' / 'xsui-picom',
 		)
 	endforeach
 endif

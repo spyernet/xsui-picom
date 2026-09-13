@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <xcb/xproto.h>
 
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 
 #include "c2.h"
 #include "common.h"
@@ -23,7 +23,7 @@
 #include "x.h"
 
 // == Functions ==
-// TODO(yshui) move static inline functions that are only used in picom.c, into picom.c
+// TODO(yshui) move static inline functions that are only used in xsui-picom.c, into xsui-picom.c
 
 void root_damaged(session_t *ps);
 

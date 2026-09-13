@@ -31,8 +31,8 @@
 #include <xcb/sync.h>
 #include <xcb/xproto.h>
 
-#include <picom/backend.h>
-#include <picom/types.h>
+#include <xsui-picom/backend.h>
+#include <xsui-picom/types.h>
 
 // FIXME This list of includes should get shorter
 #include "backend/driver.h"

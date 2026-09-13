@@ -18,7 +18,7 @@
 #include <xcb/xfixes.h>
 
 #include <libconfig.h>
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 
 #include "compiler.h"
 #include "log.h"
@@ -306,7 +306,7 @@ typedef struct options {
 	bool print_diagnostics;
 	/// Render to a separate window instead of taking over the screen
 	bool debug_mode;
-	/// For picom-inspect only, dump windows in a loop
+	/// For xsui-picom-inspect only, dump windows in a loop
 	bool inspect_monitor;
 	xcb_window_t inspect_win;
 	// === General ===

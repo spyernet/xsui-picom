@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <xcb/render.h>        // for xcb_render_fixed_t, XXX
 
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 #include <test.h>
 
 #include "common.h"
@@ -566,9 +566,9 @@ void parse_debug_option_single(char *setting, struct debug_options *debug_option
 	log_error("Invalid debug option: %s", setting);
 }
 
-/// Parse debug options from environment variable `PICOM_DEBUG`.
+/// Parse debug options from environment variable `XSUI_PICOM_DEBUG`.
 void parse_debug_options(struct debug_options *debug_options) {
-	const char *debug = getenv("PICOM_DEBUG");
+	const char *debug = getenv("XSUI_PICOM_DEBUG");
 	const struct debug_options default_debug_options = {
 	    .force_vblank_scheduler = LAST_VBLANK_SCHEDULER,
 	};

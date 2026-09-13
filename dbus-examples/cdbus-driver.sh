@@ -14,15 +14,15 @@ if [ -z "$dpy" ]; then
   exit 1
 fi
 
-service="com.github.chjj.compton.${dpy}"
-interface='com.github.chjj.compton'
-object='/com/github/chjj/compton'
+service="com.github.yshui.xsui-picom.${dpy}"
+interface='com.github.yshui.xsui-picom'
+object='/com.github.yshui.xsui-picom'
 type_win='uint32'
 type_enum='uint32'
 
 # === DBus methods ===
 
-# List all window ID compton manages (except destroyed ones)
+# List all window ID xsui-picom manages (except destroyed ones)
 dbus-send --print-reply --dest="$service" "$object" "${interface}.list_win"
 
 # Get window ID of currently focused window
@@ -38,7 +38,7 @@ else
   echo "Cannot find focused window."
 fi
 
-# Reset compton
+# Reset xsui-picom
 sleep 3
 dbus-send --print-reply --dest="$service" "$object" "${interface}.reset"
 

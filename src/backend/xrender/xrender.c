@@ -15,8 +15,8 @@
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
-#include <picom/backend.h>
-#include <picom/types.h>
+#include <xsui-picom/backend.h>
+#include <xsui-picom/types.h>
 
 #include "backend/backend.h"
 #include "backend/backend_common.h"
@@ -25,7 +25,7 @@
 #include "compiler.h"
 #include "config.h"
 #include "log.h"
-#include "picom.h"
+#include "xsui-picom.h"
 #include "region.h"
 #include "utils/kernel.h"
 #include "utils/misc.h"
@@ -93,7 +93,7 @@ typedef struct xrender_data {
 	xcb_special_event_t *present_event;
 
 	/// Cache an X region to avoid creating and destroying it every frame. A
-	/// workaround for yshui/picom#1166.
+	/// workaround for yshui/xsui-picom#1166.
 	xcb_xfixes_region_t present_region;
 	/// If vsync is enabled and supported by the current system
 	bool vsync;
@@ -1162,12 +1162,12 @@ static int xrender_max_buffer_age(struct backend_base *base) {
 	return ((struct xrender_data *)base)->vsync ? 2 : 1;
 }
 
-#define PICOM_BACKEND_XRENDER_MAJOR (0UL)
-#define PICOM_BACKEND_XRENDER_MINOR (1UL)
+#define XSUI_PICOM_BACKEND_XRENDER_MAJOR (0UL)
+#define XSUI_PICOM_BACKEND_XRENDER_MINOR (1UL)
 
 static void xrender_version(struct backend_base * /*base*/, uint64_t *major, uint64_t *minor) {
-	*major = PICOM_BACKEND_XRENDER_MAJOR;
-	*minor = PICOM_BACKEND_XRENDER_MINOR;
+	*major = XSUI_PICOM_BACKEND_XRENDER_MAJOR;
+	*minor = XSUI_PICOM_BACKEND_XRENDER_MINOR;
 }
 
 const struct backend_operations xrender_ops = {
@@ -1202,7 +1202,7 @@ const struct backend_operations xrender_ops = {
 };
 
 BACKEND_ENTRYPOINT(xrender_register) {
-	if (!backend_register(PICOM_BACKEND_MAJOR, PICOM_BACKEND_MINOR, "xrender",
+	if (!backend_register(XSUI_PICOM_BACKEND_MAJOR, XSUI_PICOM_BACKEND_MINOR, "xrender",
 	                      xrender_ops.init, true)) {
 		log_error("Failed to register xrender backend");
 	}

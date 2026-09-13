@@ -13,13 +13,13 @@
 ### Environment
 <!-- Tell us something about the desktop environment you are using, for example: i3-gaps, Gnome Shell, etc. -->
 
-### picom version
-<!-- Put the output of `picom --version` here. -->
+### xsui-picom version
+<!-- Put the output of `xsui-picom --version` here. -->
 <!-- Example: v8.2 -->
 <details>
 <summary>Diagnostics</summary>
 
-<!-- Please also include the output of `picom --diagnostics` -->
+<!-- Please also include the output of `xsui-picom --diagnostics` -->
 </details>
 
 ### Configuration:
@@ -56,7 +56,7 @@
 ### OpenGL trace
 <!--
     If you encounter visual glitches, i.e. things don't look how they supposed to look. It might be a good idea to follow the steps here:
-    https://github.com/yshui/picom/wiki/Reporting-issues#capture-a-trace , and upload the resulting trace here.
+    https://github.com/yshui/xsui-picom/wiki/Reporting-issues#capture-a-trace , and upload the resulting trace here.
 -->
 
 ### Other details

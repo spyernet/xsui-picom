@@ -11,7 +11,7 @@
   <details>
   Format the changelog entries like this:
 
-  `Changelog: BugFix: Stop picom from summoning the Great Old Ones.`
+  `Changelog: BugFix: Stop xsui-picom from summoning the Great Old Ones.`
 
   The entry starts with `Changelog: `, followed by a category name (`BugFix: ` in this case), then a short description of the changes in the commit.
   <summary>How to format changelog entries</summary>

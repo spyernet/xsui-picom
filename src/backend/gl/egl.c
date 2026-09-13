@@ -15,7 +15,7 @@
 #include "compiler.h"
 #include "config.h"
 #include "log.h"
-#include "picom.h"
+#include "xsui-picom.h"
 #include "utils/misc.h"
 #include "x.h"
 
@@ -344,12 +344,12 @@ static int egl_max_buffer_age(backend_t *base attr_unused) {
 	return 5;        // Why?
 }
 
-#define PICOM_BACKEND_EGL_MAJOR (0UL)
-#define PICOM_BACKEND_EGL_MINOR (1UL)
+#define XSUI_PICOM_BACKEND_EGL_MAJOR (0UL)
+#define XSUI_PICOM_BACKEND_EGL_MINOR (1UL)
 
 static void egl_version(struct backend_base * /*base*/, uint64_t *major, uint64_t *minor) {
-	*major = PICOM_BACKEND_EGL_MAJOR;
-	*minor = PICOM_BACKEND_EGL_MINOR;
+	*major = XSUI_PICOM_BACKEND_EGL_MAJOR;
+	*minor = XSUI_PICOM_BACKEND_EGL_MINOR;
 }
 
 const struct backend_operations egl_ops = {
@@ -405,7 +405,7 @@ void eglext_init(EGLDisplay dpy) {
 }
 
 BACKEND_ENTRYPOINT(egl_register) {
-	if (!backend_register(PICOM_BACKEND_MAJOR, PICOM_BACKEND_MINOR, "egl",
+	if (!backend_register(XSUI_PICOM_BACKEND_MAJOR, XSUI_PICOM_BACKEND_MINOR, "egl",
 	                      egl_ops.init, true)) {
 		log_error("Failed to register egl backend");
 	}

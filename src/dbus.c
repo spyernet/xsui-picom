@@ -13,14 +13,14 @@
 #include <unistd.h>
 #include <xcb/xcb.h>
 
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 
 #include "backend/backend.h"
 #include "common.h"
 #include "compiler.h"
 #include "config.h"
 #include "log.h"
-#include "picom.h"
+#include "xsui-picom.h"
 #include "utils/misc.h"
 #include "utils/str.h"
 #include "wm/defs.h"
@@ -47,15 +47,15 @@ typedef uint32_t cdbus_enum_t;
 #define CDBUS_TYPE_ENUM DBUS_TYPE_UINT32
 #define CDBUS_TYPE_ENUM_STR DBUS_TYPE_UINT32_AS_STRING
 
-#define CDBUS_SERVICE_NAME "com.github.chjj.compton"
+#define CDBUS_SERVICE_NAME "com.github.yshui.xsui-picom"
 #define CDBUS_INTERFACE_NAME CDBUS_SERVICE_NAME
-#define CDBUS_OBJECT_NAME "/com/github/chjj/compton"
+#define CDBUS_OBJECT_NAME "/com/github/yshui/xsui-picom"
 #define CDBUS_ERROR_PREFIX CDBUS_INTERFACE_NAME ".error"
 #define CDBUS_ERROR_UNKNOWN CDBUS_ERROR_PREFIX ".unknown"
 #define CDBUS_ERROR_UNKNOWN_S "Well, I don't know what happened. Do you?"
 #define CDBUS_ERROR_BADMSG CDBUS_ERROR_PREFIX ".bad_message"
 #define CDBUS_ERROR_BADMSG_S                                                             \
-	"Unrecognized command. Beware compton "                                          \
+	"Unrecognized command. Beware xsui-picom "                                          \
 	"cannot make you a sandwich."
 #define CDBUS_ERROR_BADARG CDBUS_ERROR_PREFIX ".bad_argument"
 #define CDBUS_ERROR_BADARG_S "Failed to parse argument %d: %s"
@@ -72,8 +72,8 @@ typedef uint32_t cdbus_enum_t;
 	cdbus_reply_errm(conn, dbus_message_new_error_printf(                            \
 	                           (srcmsg), (err_name), (err_format), ##__VA_ARGS__))
 
-#define PICOM_WINDOW_INTERFACE "picom.Window"
-#define PICOM_COMPOSITOR_INTERFACE "picom.Compositor"
+#define XSUI_PICOM_WINDOW_INTERFACE "xsui-picom.Window"
+#define XSUI_PICOM_COMPOSITOR_INTERFACE "xsui-picom.Compositor"
 
 static DBusHandlerResult cdbus_process(DBusConnection *conn, DBusMessage *m, void *ud);
 static DBusHandlerResult cdbus_process_windows(DBusConnection *c, DBusMessage *msg, void *ud);
@@ -573,7 +573,7 @@ cdbus_process_window_property_get(session_t *ps, DBusMessage *msg, cdbus_window_
 		return DBUS_HANDLER_RESULT_HANDLED;
 	}
 
-	if (interface[0] != '\0' && strcmp(interface, PICOM_WINDOW_INTERFACE) != 0) {
+	if (interface[0] != '\0' && strcmp(interface, XSUI_PICOM_WINDOW_INTERFACE) != 0) {
 		dbus_set_error_const(e, DBUS_ERROR_UNKNOWN_INTERFACE, NULL);
 		return DBUS_HANDLER_RESULT_HANDLED;
 	}
@@ -654,7 +654,7 @@ cdbus_process_window_property_get(session_t *ps, DBusMessage *msg, cdbus_window_
 static DBusHandlerResult cdbus_process_reset(session_t *ps, DBusMessage *msg attr_unused,
                                              DBusMessage *reply, DBusError *e attr_unused) {
 	// Reset the compositor
-	log_info("picom is resetting...");
+	log_info("xsui-picom is resetting...");
 	ev_break(ps->loop, EVBREAK_ALL);
 	if (reply != NULL && !cdbus_append_boolean(reply, true)) {
 		return DBUS_HANDLER_RESULT_NEED_MEMORY;
@@ -914,7 +914,7 @@ cdbus_process_opts_get(session_t *ps, DBusMessage *msg, DBusMessage *reply, DBus
 		return DBUS_HANDLER_RESULT_HANDLED;
 	}
 
-	append(version, string, PICOM_FULL_VERSION);
+	append(version, string, XSUI_PICOM_FULL_VERSION);
 	append(pid, int32, getpid());
 	append(display, string, DisplayString(ps->c.dpy));
 	append(config_file, string, "Unknown");
@@ -1090,7 +1090,7 @@ static DBusHandlerResult cdbus_process_introspect(DBusMessage *reply) {
 	    "      <arg name='wids' type='au' direction='out' />\n"
 	    "    </method>\n"
 	    "  </interface>\n"
-	    "  <interface name='" PICOM_COMPOSITOR_INTERFACE "'>\n"
+	    "  <interface name='" XSUI_PICOM_COMPOSITOR_INTERFACE "'>\n"
 	    "    <signal name='WinAdded'>\n"
 	    "      <arg name='wid' type='" CDBUS_TYPE_WINDOW_STR "'/>\n"
 	    "    </signal>\n"
@@ -1187,7 +1187,7 @@ static bool cdbus_process_window_introspect(DBusMessage *reply) {
 	    "      <arg type='as' name='invalidated_properties'/>\n"
 	    "    </signal>\n"
 	    "  </interface>\n"
-	    "  <interface name='" PICOM_WINDOW_INTERFACE "'>\n"
+	    "  <interface name='" XSUI_PICOM_WINDOW_INTERFACE "'>\n"
 	    "    <property type='" CDBUS_TYPE_WINDOW_STR "' name='Leader' access='read'/>\n"
 	    "    <property type='" CDBUS_TYPE_WINDOW_STR "' name='ClientWin' access='read'/>\n"
 	    "    <property type='" CDBUS_TYPE_WINDOW_STR "' name='Id' access='read'/>\n"
@@ -1402,7 +1402,7 @@ cdbus_process_windows(DBusConnection *conn, DBusMessage *msg, void *ud) {
 			    "Unexpected member \"%s\" of dbus properties interface.", member);
 			dbus_set_error_const(&err, DBUS_ERROR_UNKNOWN_METHOD, NULL);
 		}
-	} else if (strcmp(interface, PICOM_WINDOW_INTERFACE) == 0 &&
+	} else if (strcmp(interface, XSUI_PICOM_WINDOW_INTERFACE) == 0 &&
 	           strcmp(member, "BlockUnblockAnimation") == 0) {
 		bool block = false;
 		const char *trigger_str = NULL;
@@ -1484,28 +1484,28 @@ static bool cdbus_signal_wid(struct cdbus_data *cd, const char *interface,
 void cdbus_ev_win_added(struct cdbus_data *cd, struct win *w) {
 	if (cd->dbus_conn) {
 		cdbus_signal_wid(cd, CDBUS_INTERFACE_NAME, "win_added", win_id(w));
-		cdbus_signal_wid(cd, PICOM_COMPOSITOR_INTERFACE, "WinAdded", win_id(w));
+		cdbus_signal_wid(cd, XSUI_PICOM_COMPOSITOR_INTERFACE, "WinAdded", win_id(w));
 	}
 }
 
 void cdbus_ev_win_destroyed(struct cdbus_data *cd, struct win *w) {
 	if (cd->dbus_conn) {
 		cdbus_signal_wid(cd, CDBUS_INTERFACE_NAME, "win_destroyed", win_id(w));
-		cdbus_signal_wid(cd, PICOM_COMPOSITOR_INTERFACE, "WinDestroyed", win_id(w));
+		cdbus_signal_wid(cd, XSUI_PICOM_COMPOSITOR_INTERFACE, "WinDestroyed", win_id(w));
 	}
 }
 
 void cdbus_ev_win_mapped(struct cdbus_data *cd, struct win *w) {
 	if (cd->dbus_conn) {
 		cdbus_signal_wid(cd, CDBUS_INTERFACE_NAME, "win_mapped", win_id(w));
-		cdbus_signal_wid(cd, PICOM_COMPOSITOR_INTERFACE, "WinMapped", win_id(w));
+		cdbus_signal_wid(cd, XSUI_PICOM_COMPOSITOR_INTERFACE, "WinMapped", win_id(w));
 	}
 }
 
 void cdbus_ev_win_unmapped(struct cdbus_data *cd, struct win *w) {
 	if (cd->dbus_conn) {
 		cdbus_signal_wid(cd, CDBUS_INTERFACE_NAME, "win_unmapped", win_id(w));
-		cdbus_signal_wid(cd, PICOM_COMPOSITOR_INTERFACE, "WinUnmapped", win_id(w));
+		cdbus_signal_wid(cd, XSUI_PICOM_COMPOSITOR_INTERFACE, "WinUnmapped", win_id(w));
 	}
 }
 

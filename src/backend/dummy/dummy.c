@@ -1,7 +1,7 @@
 #include <uthash.h>
 #include <xcb/xcb.h>
 
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 
 #include "backend/backend.h"
 #include "backend/backend_common.h"
@@ -208,12 +208,12 @@ static int dummy_max_buffer_age(struct backend_base *base attr_unused) {
 	return 5;
 }
 
-#define PICOM_BACKEND_DUMMY_MAJOR (0UL)
-#define PICOM_BACKEND_DUMMY_MINOR (1UL)
+#define XSUI_PICOM_BACKEND_DUMMY_MAJOR (0UL)
+#define XSUI_PICOM_BACKEND_DUMMY_MINOR (1UL)
 
 static void dummy_version(struct backend_base * /*base*/, uint64_t *major, uint64_t *minor) {
-	*major = PICOM_BACKEND_DUMMY_MAJOR;
-	*minor = PICOM_BACKEND_DUMMY_MINOR;
+	*major = XSUI_PICOM_BACKEND_DUMMY_MAJOR;
+	*minor = XSUI_PICOM_BACKEND_DUMMY_MINOR;
 }
 
 const struct backend_operations dummy_ops = {
@@ -243,7 +243,7 @@ const struct backend_operations dummy_ops = {
 };
 
 BACKEND_ENTRYPOINT(dummy_register) {
-	if (!backend_register(PICOM_BACKEND_MAJOR, PICOM_BACKEND_MINOR, "dummy",
+	if (!backend_register(XSUI_PICOM_BACKEND_MAJOR, XSUI_PICOM_BACKEND_MINOR, "dummy",
 	                      dummy_ops.init, false)) {
 		log_error("Failed to register dummy backend");
 	}

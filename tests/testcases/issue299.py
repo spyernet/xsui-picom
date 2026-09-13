@@ -20,9 +20,9 @@ x = xproto.xprotoExtension(conn)
 visual32 = find_32bit_visual(conn)
 
 async def get_client_win_async(wid):
-    message = await bus.call(Message(destination='com.github.chjj.compton.'+display,
-        path='/com/github/chjj/compton',
-        interface='com.github.chjj.compton',
+    message = await bus.call(Message(destination='com.github.yshui.xsui-picom.'+display,
+        path='/com.github.yshui.xsui-picom',
+        interface='com.github.yshui.xsui-picom',
         member='win_get',
         signature='us',
         body=[wid, 'client_win']))

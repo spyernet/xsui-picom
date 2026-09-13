@@ -16,12 +16,12 @@ srcs = [
 		'inspect.c',
 		'log.c',
 		'options.c',
-		'picom.c',
+		'xsui-picom.c',
 		'vblank.c',
 		'x.c',
 	),
 ]
-picom_inc = include_directories(['.', '../include'])
+xsui_picom_inc = include_directories(['.', '../include'])
 
 cflags = []
 
@@ -136,7 +136,7 @@ libtools = static_library(
 		'transition/curve.c',
 		'transition/script.c',
 	],
-	include_directories: picom_inc,
+	include_directories: xsui_picom_inc,
 	dependencies: [test_h_dep],
 	install: false,
 	build_by_default: false,
@@ -148,7 +148,7 @@ xsui_picom = executable(
 	c_args: cflags,
 	dependencies: [base_deps, deps, test_h_dep] + dl_dep,
 	install: true,
-	include_directories: picom_inc,
+	include_directories: xsui_picom_inc,
 	export_dynamic: true,
 	gnu_symbol_visibility: 'hidden',
 )
@@ -168,6 +168,6 @@ if cc.has_argument('-fsanitize=fuzzer')
 		dependencies: [base_deps, deps, test_h_dep],
 		build_by_default: false,
 		install: false,
-		include_directories: picom_inc,
+		include_directories: xsui_picom_inc,
 	)
 endif

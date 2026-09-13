@@ -1,8 +1,8 @@
-= picom(1)
+= xsui-picom(1)
 Yuxuan Shui
 :doctype:    manpage
-:mansource:  picom
-:manversion: {picom-version}
+:mansource:  xsui-picom
+:manversion: {xsui-picom-version}
 :manmanual:  User Commands
 :source-highlighter: highlight.js
 :highlightjs-languages: glsl
@@ -10,15 +10,17 @@ Yuxuan Shui
 
 NAME
 ----
-picom - a compositor for X11
+xsui-picom - a compositor for X11
 
 SYNOPSIS
 --------
-*picom* [_OPTIONS_]
+*xsui-picom* [_OPTIONS_]
 
 DESCRIPTION
 -----------
-picom is a compositor based on Dana Jansens' version of xcompmgr (which itself was written by Keith Packard). It includes some improvements over the original xcompmgr, like window frame opacity and inactive window transparency.
+xsui-picom is a compositor based on Dana Jansens' version of xcompmgr (which itself was written by Keith Packard). It includes some improvements over the original xcompmgr, like window frame opacity and inactive window transparency.
+
+Background blur and shadow are never applied to the following windows, regardless of configuration: popup menus, dropdown menus, top-level menus, tooltips, notifications, dialogs, and override-redirect windows. Additionally, background blur and shadow are not applied to windows with opacity 5% or lower. These are hardcoded behavioral changes and cannot be configured.
 
 OPTIONS
 -------
@@ -47,7 +49,7 @@ OPTIONS
 	The time between steps in fade step, in milliseconds. (> 0, defaults to 10)
 
 *-c*, *--shadow*::
-	Enabled client-side shadows on windows. Note desktop windows (windows with __NET_WM_WINDOW_TYPE_DESKTOP_) never get shadow, unless explicitly requested using the wintypes option.
+	Enabled client-side shadows on windows. Note desktop windows (windows with __NET_WM_WINDOW_TYPE_DESKTOP_) never get shadow, unless explicitly requested using the wintypes option. Popup menus, dropdown menus, tooltips, notifications, dialogs, and override-redirect windows also never get shadow. Windows with opacity 5% or lower are also excluded from shadowing.
 
 [[fading]]*-f*, *--fading*::
 	Fade windows in/out when opening/closing and when opacity changes, unless *--no-fading-openclose* is used.
@@ -71,13 +73,13 @@ OPTIONS
 	Show all X errors (for debugging).
 
 *--config* _PATH_::
-	Look for configuration file at the path. See xref:_configuration_files[*CONFIGURATION FILES*] section below for where picom looks for a configuration file by default. Use `/dev/null` to avoid loading configuration file.
+	Look for configuration file at the path. See xref:_configuration_files[*CONFIGURATION FILES*] section below for where xsui-picom looks for a configuration file by default. Use `/dev/null` to avoid loading configuration file.
 
 *--write-pid-path* _PATH_::
 	Write process ID to a file. It is recommended to use an absolute path.
 
 *--plugins* _PATH_::
-	Specify plugins to load. Plugins will first be searched in current working directory (unless specified in the config file, in which case this step is skipped), then in `$XDG_CONFIG_HOME/picom/plugins`, then in `$XDG_CONFIG_DIRS/picom/plugins`. If all of the above fail, the plugin name is passed directly to the dynamic loader. Can be specified multiple times to load more than one plugins.
+	Specify plugins to load. Plugins will first be searched in current working directory (unless specified in the config file, in which case this step is skipped), then in `$XDG_CONFIG_HOME/xsui-picom/plugins`, then in `$XDG_CONFIG_DIRS/xsui-picom/plugins`. If all of the above fail, the plugin name is passed directly to the dynamic loader. Can be specified multiple times to load more than one plugins.
 
 [[shadow-color]]*--shadow-color* _STRING_::
 	Color of shadow, as a hex string (e.g. _#000000_)
@@ -182,10 +184,10 @@ OPTIONS
 	Parameters for blur noise. See the xref:_blur[*BLUR*] section for more information.
 
 *--blur-background*::
-	Blur background of semi-transparent / ARGB windows. Bad in performance, with driver-dependent behavior. The name of the switch may change without prior notifications.
+	Blur background of semi-transparent / ARGB windows. Bad in performance, with driver-dependent behavior. The name of the switch may change without prior notifications. Note popup menus, dropdown menus, tooltips, notifications, dialogs, and override-redirect windows are never blurred. Windows with opacity 5% or lower are also excluded from background blur.
 
 *--blur-background-frame*::
-	Blur background of windows when the window frame is not opaque.  Implies *--blur-background*. Bad in performance, with driver-dependent behavior. The name may change.
+	Blur background of windows when the window frame is not opaque.  Implies *--blur-background*. Bad in performance, with driver-dependent behavior. The name may change. Note popup menus, dropdown menus, tooltips, notifications, dialogs, and override-redirect windows are never blurred. Windows with opacity 5% or lower are also excluded.
 
 *--blur-background-fixed*::
 	Use fixed blur strength for a window during fading. This only applies to the *--fading* option, and will be a no-op if animation scripts are used.
@@ -218,7 +220,7 @@ May also be one of the predefined kernels: `3x3box` (default), `5x5box`, `7x7box
 	Specify a list of conditions of windows that should be painted with inverted color. Resource-hogging, and is not well tested. Using this is discouraged, see the xref:_window_rules[*WINDOW RULES*] section for the recommended way to do this.
 
 [[opacity-rule]]*--opacity-rule* _OPACITY_:__CONDITION__::
-	Specify a list of opacity rules, in the format `PERCENT:PATTERN`, like `50:name pass:[*]= "Firefox"`. picom-trans is recommended over this. Note we don't make any guarantee about possible conflicts with other programs that set _pass:[_]NET_WM_WINDOW_OPACITY_ on frame or client windows. Using this is discouraged, see the xref:_window_rules[*WINDOW RULES*] section for the recommended way to set window-specific opacity.
+	Specify a list of opacity rules, in the format `PERCENT:PATTERN`, like `50:name pass:[*]= "Firefox"`. xsui-picom-trans is recommended over this. Note we don't make any guarantee about possible conflicts with other programs that set _pass:[_]NET_WM_WINDOW_OPACITY_ on frame or client windows. Using this is discouraged, see the xref:_window_rules[*WINDOW RULES*] section for the recommended way to set window-specific opacity.
 
 *--crop-shadow-to-monitor*::
 	Crop shadow of a window fully on a particular monitor to that monitor. This is currently implemented using the X RandR extension.
@@ -235,7 +237,7 @@ May also be one of the predefined kernels: `3x3box` (default), `5x5box`, `7x7box
 	Disable the use of damage information. This cause the whole screen to be redrawn every time, instead of the part of the screen has actually changed. Potentially degrades the performance, but might fix some artifacts.
 
 *--xrender-sync-fence*::
-	Use X Sync fence to sync clients' draw calls, to make sure all draw calls are finished before picom starts drawing. Needed on nvidia-drivers with GLX backend for some users.
+	Use X Sync fence to sync clients' draw calls, to make sure all draw calls are finished before xsui-picom starts drawing. Needed on nvidia-drivers with GLX backend for some users.
 
 *--force-win-blend*::
 	Force all windows to be painted with blending. Useful if you have a window shader that could turn opaque pixels transparent.
@@ -367,7 +369,7 @@ Most of the rule options should 1:1 map to the new window rules. Here is a list 
 *Inactive dimming and opacity*:: This includes options <<inactive-opacity>>, <<inactive-dim>>, <<active-opacity>>,
 <<inactive-opacity-override>>, <<mark-wmwin-focused>>, and <<mark-ovredir-focused>>. When using the window rules, the compositor no longer have an "active window" concept, as it is easy to achieve with window rules. You can use `match = "focused || group_focused"` to match windows that would have been considered active with the old options. Then you can set the opacity and dim level for matched windows accordingly. <<mark-wmwin-focused>> and <<mark-ovredir-focused>> can be achieved by adding `|| wmwin` and `|| override_redirect` to the match string, respectively. <<inactive-opacity-override>> can be achieved by setting `opacity-override = true`.
 +
-NOTE: Setting _opacity_ explicitly with a rule will override the opacity value from the window properties (i.e. _pass:[_]NET_WM_WINDOW_OPACITY_), which is used by tools like `picom-trans` for setting the opacity of window. If you would like to keep using tools like `picom-trans`, you can choose to set the opacity only for windows without the opacity property by matching `! _NET_WM_WINDOW_OPACITY`.
+NOTE: Setting _opacity_ explicitly with a rule will override the opacity value from the window properties (i.e. _pass:[_]NET_WM_WINDOW_OPACITY_), which is used by tools like `xsui-picom-trans` for setting the opacity of window. If you would like to keep using tools like `xsui-picom-trans`, you can choose to set the opacity only for windows without the opacity property by matching `! _NET_WM_WINDOW_OPACITY`.
 
 *Active window*:: This includes option <<focus-exclude>>. This option was only used to influence what windows are considered active, to apply inactive opacity and dimming. Since with window rules you no longer need the compositor to help you decide what is active and what is not (see above), this option is no longer needed.
 
@@ -498,7 +500,7 @@ Examples:
 ANIMATIONS
 ----------
 
-picom supports xref:fading[fading] animation when you open or close a window. In addition to that, picom also has a very powerful animation script system, which can be used to animate many aspects of a window based on certain triggers. Animation scripts can be defined in your configuration file by setting the option _animations_. It is also possible to define animations per-window using the xref:_window_rules[*WINDOW RULES*] system, by setting the <<window-rules-animations>> option in a rule. (Read the rest of this section first before you go there.)
+xsui-picom supports xref:fading[fading] animation when you open or close a window. In addition to that, xsui-picom also has a very powerful animation script system, which can be used to animate many aspects of a window based on certain triggers. Animation scripts can be defined in your configuration file by setting the option _animations_. It is also possible to define animations per-window using the xref:_window_rules[*WINDOW RULES*] system, by setting the <<window-rules-animations>> option in a rule. (Read the rest of this section first before you go there.)
 
 The basic syntax of the _animations_ option is as follows:
 
@@ -548,7 +550,7 @@ WARNING: The _size_ and _position_ triggers are experimental. Using this means y
 
 === Presets
 
-Defining an animation is a bit involved. To make animations more approachable, without you having to learn the nitty-gritty details of the script system, picom provides a number of presets that you can use by just specifying a handful of options.
+Defining an animation is a bit involved. To make animations more approachable, without you having to learn the nitty-gritty details of the script system, xsui-picom provides a number of presets that you can use by just specifying a handful of options.
 
 To choose a preset, add a _preset_ option to an animation script group, like this:
 
@@ -564,7 +566,7 @@ animations = ({
 Some presets have additional options that you can set to customize the animation. In this example, the _slide-out_ preset has a _direction_ option specifying the direction of the sliding animation.
 
 ifndef::env-web[]
-NOTE: Describing animations with only words is difficult. We have short video clips showing off each preset, but sadly they cannot be included in this manpage. The web version of this document hosted on our website at https://picom.app[] on the other hand, does have those clips.
+NOTE: Describing animations with only words is difficult. We have short video clips showing off each preset, but sadly they cannot be included in this manpage. The web version of this document hosted on our website at https://xsui-picom.app[] on the other hand, does have those clips.
 endif::[]
 
 The following presets are available: ::
@@ -755,7 +757,7 @@ IMPORTANT: If an output variable name is not defined in your animation script, i
 
 Now you know how to animate a window. But this is still not powerful enough to support most animations you might want to define. For example, if you want your window to fly out the right side of your screen, the amount of pixels it has to move depends on where it is on the screen, and its width. For the last piece of the puzzle, we have context variables.
 
-A context variable is a variable picom defines for you, and you can use them in expressions like any other variables. Their values reflect certain attributes of the window you are animating.
+A context variable is a variable xsui-picom defines for you, and you can use them in expressions like any other variables. Their values reflect certain attributes of the window you are animating.
 
 WARNING: If you define a variable with the same name as a context variable, your variable will shadow the context variable. Since more context variables can be added in the future, this can be difficult to avoid. Thus, the same rule for output variables applies here as well: if you need to define a temporary variable, use one of the reserved names.
 
@@ -780,18 +782,18 @@ IMPORTANT: All of the _window-*-before_ variables are updated every frame, and r
 
 === Share your animations
 
-If you have created an animation script that you think is particularly cool, you are encouraged to share it with the community. You can submit an issue or a pull request to picom on GitHub, and get a chance to have your animation included as one of the presets, so it can be used by everyone.
+If you have created an animation script that you think is particularly cool, you are encouraged to share it with the community. You can submit an issue or a pull request to xsui-picom on GitHub, and get a chance to have your animation included as one of the presets, so it can be used by everyone.
 
 SHADER INTERFACE
 ----------------
 
-This section describes the interface of a custom shader, how it is used by picom, and what parameters are passed by picom to the shader.
+This section describes the interface of a custom shader, how it is used by xsui-picom, and what parameters are passed by xsui-picom to the shader.
 
-A custom shader is a GLSL fragment shader program, which can be used to override the default way of how a window is rendered. If a custom shader is used, the default picom effects (e.g. dimming, color inversion, etc.) will no longer be automatically applied. It would be the custom shader's responsibility to apply these effects.
+A custom shader is a GLSL fragment shader program, which can be used to override the default way of how a window is rendered. If a custom shader is used, the default xsui-picom effects (e.g. dimming, color inversion, etc.) will no longer be automatically applied. It would be the custom shader's responsibility to apply these effects.
 
-The interface between picom and a custom shader is dependent on which backend is being used. The xrender backend doesn't support shader at all. Here we describe the interface provided by the glx backend.
+The interface between xsui-picom and a custom shader is dependent on which backend is being used. The xrender backend doesn't support shader at all. Here we describe the interface provided by the glx backend.
 
-The shader must define a function, _vec4 window_shader()_, which would be the entry point of the shader. The returned _vec4_ will be used to set __gl_FragColor__. A function, _vec4 default_post_processing(vec4 c)_, is provided for applying the default picom effects to input color 'c'.
+The shader must define a function, _vec4 window_shader()_, which would be the entry point of the shader. The returned _vec4_ will be used to set __gl_FragColor__. A function, _vec4 default_post_processing(vec4 c)_, is provided for applying the default xsui-picom effects to input color 'c'.
 
 The following uniform/input variables are made available to the shader:
 
@@ -811,7 +813,7 @@ uniform float max_brightness; // configured maximum brightness of the window (0.
 uniform float time;           // time in milliseconds, counting from an unspecified starting point
 ----
 
-The default behavior of picom window rendering can be replicated by the following shader:
+The default behavior of xsui-picom window rendering can be replicated by the following shader:
 
 [source,glsl]
 ----
@@ -841,11 +843,11 @@ The interface is expected to be mostly stable.
 
 CONFIGURATION FILES
 -------------------
-picom could read from a configuration file if libconfig support is compiled in. If *--config* is not used, picom will seek for a configuration file in `$XDG_CONFIG_HOME/picom.conf` (`~/.config/picom.conf`, usually), then `$XDG_CONFIG_HOME/picom/picom.conf`, then `$XDG_CONFIG_DIRS/picom.conf` (often `/etc/xdg/picom.conf`), then `$XDG_CONFIG_DIRS/picom/picom.conf`.
+xsui-picom could read from a configuration file if libconfig support is compiled in. If *--config* is not used, xsui-picom will seek for a configuration file in `$XDG_CONFIG_HOME/xsui-picom.conf` (`~/.config/xsui-picom.conf`, usually), then `$XDG_CONFIG_HOME/xsui-picom/xsui-picom.conf`, then `$XDG_CONFIG_DIRS/xsui-picom.conf` (often `/etc/xdg/xsui-picom.conf`), then `$XDG_CONFIG_DIRS/xsui-picom/xsui-picom.conf`.
 
-When `@include` directive is used in the config file, picom will first search for the included file in the parent directory of `picom.conf`, then in `$XDG_CONFIG_HOME/picom/include/`, then in `$XDG_CONFIG_DIRS/picom/include`.
+When `@include` directive is used in the config file, xsui-picom will first search for the included file in the parent directory of `xsui-picom.conf`, then in `$XDG_CONFIG_HOME/xsui-picom/include/`, then in `$XDG_CONFIG_DIRS/xsui-picom/include`.
 
-picom uses general libconfig configuration file format. A sample configuration file is available as `picom.sample.conf` in the source tree. Most of command line switches can be used as options in configuration file as well. For example, *--vsync* option documented above can be set in the configuration file using `vsync = `. Command line options will always overwrite the settings in the configuration file.
+xsui-picom uses general libconfig configuration file format. A sample configuration file is available as `xsui-picom.sample.conf` in the source tree. Most of command line switches can be used as options in configuration file as well. For example, *--vsync* option documented above can be set in the configuration file using `vsync = `. Command line options will always overwrite the settings in the configuration file.
 
 Some options can only be set in the configuration file. Such options include `rules` (see xref:_window_rules[*WINDOW RULES*]), `animations` (see xref:_animations[*ANIMATIONS*]), `wintypes` (see below).
 
@@ -865,10 +867,14 @@ IMPORTANT: According to the window manager specification, a window can have mult
 
 _WINDOW_TYPE_ is one of the 15 window types defined in EWMH standard: "unknown", "desktop", "dock", "toolbar", "menu", "utility", "splash", "dialog", "normal", "dropdown_menu", "popup_menu", "tooltip", "notification", "combo", and "dnd".
 
+The following window types are always treated as overlay windows and are excluded from background blur and shadow, regardless of configuration: `popup_menu`, `dropdown_menu`, `menu`, `tooltip`, `notification`, `dialog`, and `normal` windows with override-redirect. This is a hardcoded behavioral change and cannot be configured.
+
+Additionally, windows with opacity 5% (0.05) or lower are excluded from background blur and shadow. This is a hardcoded behavioral change and cannot be configured.
+
 Following per window-type options are available: ::
 
-  fade, shadow:::
-    Controls window-type-specific shadow and fade settings.
+   fade, shadow:::
+     Controls window-type-specific shadow and fade settings. Shadow is never drawn for popup menus, dropdown menus, tooltips, notifications, dialogs, and override-redirect windows, regardless of this setting. Also, shadow is never drawn for windows with opacity 5% or lower.
 
   opacity:::
     Controls default opacity of the window type.
@@ -876,8 +882,8 @@ Following per window-type options are available: ::
   focus:::
     Controls whether the window of this type is to be always considered focused. (By default, all window types except "normal" and "dialog" has this on.)
 
-  blur-background:::
-    Controls whether the window of this type will have its transparent background blurred.
+   blur-background:::
+     Controls whether the window of this type will have its transparent background blurred. Note this setting is ignored for popup menus, dropdown menus, tooltips, notifications, dialogs, and override-redirect windows, which are never blurred regardless of this setting. Also ignored for windows with opacity 5% or lower.
 
   full-shadow:::
     Controls whether shadow is drawn under the parts of the window that you normally won't be able to see. Useful when the window has parts of it transparent, and you want shadows in those areas.
@@ -931,12 +937,12 @@ If blur is enabled, noise can be configured with the following options: ::
 SIGNALS
 -------
 
-* picom reinitializes itself upon receiving `SIGUSR1`.
+* xsui-picom reinitializes itself upon receiving `SIGUSR1`.
 
 D-BUS API
 ---------
 
-It's possible to control picom via D-Bus messages, by running picom with *--dbus* and send messages to `com.github.chjj.compton.<DISPLAY>`. `<DISPLAY>` is the display used by picom, with all non-alphanumeric characters transformed to underscores. For `DISPLAY=:0.0` you should use `com.github.chjj.compton._0_0`, for example.
+It's possible to control xsui-picom via D-Bus messages, by running xsui-picom with *--dbus* and send messages to `com.github.yshui.xsui-picom.<DISPLAY>`. `<DISPLAY>` is the display used by xsui-picom, with all non-alphanumeric characters transformed to underscores. For `DISPLAY=:0.0` you should use `com.github.yshui.xsui-picom._0_0`, for example.
 
 The D-Bus methods and signals are not yet stable, thus undocumented right now.
 
@@ -946,49 +952,49 @@ EXAMPLES
 * Disable configuration file parsing:
 +
 ------------
-$ picom --config /dev/null
+$ xsui-picom --config /dev/null
 ------------
 
-* Run picom with client-side shadow and fading:
+* Run xsui-picom with client-side shadow and fading:
 +
 ------------
-$ picom -cf
+$ xsui-picom -cf
 ------------
 
 * Same thing as above, plus making inactive windows 80% transparent, making frame 80% transparent, don't fade on window open/close, and fork to background:
 +
 ------------
-$ picom -bcf -i 0.8 -e 0.8 --no-fading-openclose
+$ xsui-picom -bcf -i 0.8 -e 0.8 --no-fading-openclose
 ------------
 
 * Draw white shadows:
 +
 ------------
-$ picom -c --shadow-red 1 --shadow-green 1 --shadow-blue 1
+$ xsui-picom -c --shadow-red 1 --shadow-green 1 --shadow-blue 1
 ------------
 
 * Avoid drawing shadows on wbar window:
 +
 ------------
-$ picom -c --shadow-exclude 'class_g = "wbar"'
+$ xsui-picom -c --shadow-exclude 'class_g = "wbar"'
 ------------
 
 * Enable VSync with GLX backend:
 +
 ------------
-$ picom --backend glx --vsync
+$ xsui-picom --backend glx --vsync
 ------------
 
 BUGS
 ----
-Please submit bug reports to <https://github.com/yshui/picom>.
+Please submit bug reports to <https://github.com/yshui/xsui-picom>.
 
 Out dated information in this man page is considered a bug.
 
 RESOURCES
 ---------
-Homepage: <https://github.com/yshui/picom>
+Homepage: <https://github.com/yshui/xsui-picom>
 
 SEE ALSO
 --------
-*xcompmgr*(1), xref:picom-inspect.1.adoc[*picom-inspect*(1)], xref:picom-trans.1.adoc[*picom-trans*(1)]
+*xcompmgr*(1), xref:xsui-picom-inspect.1.adoc[*xsui-picom-inspect*(1)], xref:xsui-picom-trans.1.adoc[*xsui-picom-trans*(1)]

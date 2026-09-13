@@ -27,7 +27,7 @@
 #include "compiler.h"
 #include "config.h"
 #include "log.h"
-#include "picom.h"
+#include "xsui-picom.h"
 #include "utils/misc.h"
 #include "x.h"
 
@@ -500,12 +500,12 @@ static int glx_max_buffer_age(struct backend_base *base attr_unused) {
 	return 5;        // Why?
 }
 
-#define PICOM_BACKEND_GLX_MAJOR (0UL)
-#define PICOM_BACKEND_GLX_MINOR (1UL)
+#define XSUI_PICOM_BACKEND_GLX_MAJOR (0UL)
+#define XSUI_PICOM_BACKEND_GLX_MINOR (1UL)
 
 static void glx_version(struct backend_base * /*base*/, uint64_t *major, uint64_t *minor) {
-	*major = PICOM_BACKEND_GLX_MAJOR;
-	*minor = PICOM_BACKEND_GLX_MINOR;
+	*major = XSUI_PICOM_BACKEND_GLX_MAJOR;
+	*minor = XSUI_PICOM_BACKEND_GLX_MINOR;
 }
 
 const struct backend_operations glx_ops = {
@@ -561,7 +561,7 @@ void glxext_init(Display *dpy, int screen) {
 }
 
 BACKEND_ENTRYPOINT(glx_register) {
-	if (!backend_register(PICOM_BACKEND_MAJOR, PICOM_BACKEND_MINOR, "glx",
+	if (!backend_register(XSUI_PICOM_BACKEND_MAJOR, XSUI_PICOM_BACKEND_MINOR, "glx",
 	                      glx_ops.init, true)) {
 		log_error("Failed to register glx backend");
 	}

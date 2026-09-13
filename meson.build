@@ -1,4 +1,4 @@
-project('picom', 'c', version: '13',
+project('xsui-picom', 'c', version: '13',
         default_options: ['c_std=c11', 'warning_level=1'])
 
 cc = meson.get_compiler('c')
@@ -22,13 +22,13 @@ if git.found()
 	endif
 endif
 
-add_global_arguments('-DPICOM_VERSION="v'+meson.project_version()+'"', language: 'c')
+add_global_arguments('-DXSUI_PICOM_VERSION="v'+meson.project_version()+'"', language: 'c')
 if is_variable('repository')
-	add_global_arguments('-DPICOM_FULL_VERSION="v'+meson.project_version()+' ('+repository+' revision '+commit_hash_short+')"', language: 'c')
+	add_global_arguments('-DXSUI_PICOM_FULL_VERSION="v'+meson.project_version()+' ('+repository+' revision '+commit_hash_short+')"', language: 'c')
 elif is_variable('commit_hash_short')
-	add_global_arguments('-DPICOM_FULL_VERSION="v'+meson.project_version()+' (revision '+commit_hash_short+')"', language: 'c')
+	add_global_arguments('-DXSUI_PICOM_FULL_VERSION="v'+meson.project_version()+' (revision '+commit_hash_short+')"', language: 'c')
 else
-	add_global_arguments('-DPICOM_FULL_VERSION="v'+meson.project_version()+'"', language: 'c')
+	add_global_arguments('-DXSUI_PICOM_FULL_VERSION="v'+meson.project_version()+'"', language: 'c')
 endif
 
 if get_option('buildtype') == 'release'
@@ -70,7 +70,7 @@ if get_option('modularize')
 	add_global_arguments(['-fmodules',
 	                      '-fmodule-map-file='+
 	                      meson.current_source_dir()+
-	                      '/src/picom.modulemap'],
+	                      '/src/xsui-picom.modulemap'],
 	                     language: 'c')
 endif
 
@@ -109,24 +109,24 @@ subdir('man')
 subdir('tools')
 subdir('include')
 
-install_data('bin/picom-trans', install_dir: get_option('bindir'))
-install_data('picom.desktop', install_dir: 'share/applications')
-install_data('picom.desktop', install_dir: get_option('sysconfdir') / 'xdg' / 'autostart')
+install_data('bin/xsui-picom-trans', install_dir: get_option('bindir'))
+install_data('xsui-picom.desktop', install_dir: 'share/applications')
+install_data('xsui-picom.desktop', install_dir: get_option('sysconfdir') / 'xdg' / 'autostart')
 
 pkgconf = import('pkgconfig')
 
-picom_pc = pkgconf.generate(
-  name: 'picom-api',
-  description: 'picom API headers',
+xsui_picom_pc = pkgconf.generate(
+  name: 'xsui-picom-api',
+  description: 'xsui-picom API headers',
   requires: [ 'pixman-1', 'xcb' ],
-  subdirs: 'picom',
+  subdirs: 'xsui-picom',
 )
 
 if get_option('compton')
 	install_data('compton.desktop', install_dir: 'share/applications')
-	install_data('media/icons/48x48/compton.png',
+	install_data('media/icons/48x48/xsui-picom.png',
                      install_dir: 'share/icons/hicolor/48x48/apps')
-	install_data('media/compton.svg',
+	install_data('media/xsui-picom.svg',
                      install_dir: 'share/icons/hicolor/scalable/apps')
 
 	meson.add_install_script('meson/install.sh')

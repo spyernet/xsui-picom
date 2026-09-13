@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 /*
- * picom - a compositor for X11
+ * xsui-picom - a compositor for X11
  *
- * Based on `compton` - Copyright (c) 2011-2013, Christopher Jeffrey
+ * Based on `xsui-picom` - Copyright (c) 2011-2013, Christopher Jeffrey
  * Based on `xcompmgr` - Copyright (c) 2003, Keith Packard
  *
  * Copyright (c) 2019-2023, Yuxuan Shui
@@ -36,8 +36,8 @@
 #include <xcb/xcb_aux.h>
 #include <xcb/xfixes.h>
 
-#include <picom/backend.h>
-#include <picom/types.h>
+#include <xsui-picom/backend.h>
+#include <xsui-picom/types.h>
 #include <test.h>
 
 #include "api_internal.h"
@@ -53,7 +53,7 @@
 #include "inspect.h"
 #include "log.h"
 #include "options.h"
-#include "picom.h"
+#include "xsui-picom.h"
 #include "region.h"
 #include "renderer/command_builder.h"
 #include "renderer/layout.h"
@@ -966,7 +966,7 @@ static int register_cm(session_t *ps) {
 		    ps->c.c, xcb_change_property_checked(
 		                 ps->c.c, XCB_PROP_MODE_REPLACE, ps->reg_win, prop_atoms[i],
 		                 prop_is_utf8[i] ? ps->atoms->aUTF8_STRING : XCB_ATOM_STRING,
-		                 8, strlen("picom"), "picom"));
+		                 8, strlen("xsui-picom"), "xsui-picom"));
 		if (e) {
 			log_error_x_error(&ps->c, e, "Failed to set window property %d",
 			                  prop_atoms[i]);
@@ -974,11 +974,11 @@ static int register_cm(session_t *ps) {
 		}
 	}
 
-	const char picom_class[] = "picom\0picom";
+	const char xsui_picom_class[] = "xsui-picom\0xsui-picom";
 	e = xcb_request_check(
 	    ps->c.c, xcb_change_property_checked(ps->c.c, XCB_PROP_MODE_REPLACE, ps->reg_win,
 	                                         ps->atoms->aWM_CLASS, XCB_ATOM_STRING, 8,
-	                                         ARR_SIZE(picom_class), picom_class));
+	                                         ARR_SIZE(xsui_picom_class), xsui_picom_class));
 	if (e) {
 		log_error_x_error(&ps->c, e, "Failed to set the WM_CLASS property");
 		free(e);
@@ -1020,7 +1020,7 @@ static int register_cm(session_t *ps) {
 	e = xcb_request_check(ps->c.c, xcb_change_property_checked(
 	                                   ps->c.c, XCB_PROP_MODE_REPLACE, ps->reg_win,
 	                                   ps->atoms->aCOMPTON_VERSION, XCB_ATOM_STRING, 8,
-	                                   (uint32_t)strlen(PICOM_VERSION), PICOM_VERSION));
+	                                   (uint32_t)strlen(XSUI_PICOM_VERSION), XSUI_PICOM_VERSION));
 	if (e) {
 		log_error_x_error(&ps->c, e, "Failed to set COMPTON_VERSION.");
 		free(e);
@@ -1567,13 +1567,13 @@ static void handle_pending_updates(struct session *ps, double delta_t) {
  * This will result in the compositor resetting itself after next paint.
  */
 static void reset_enable(EV_P_ ev_signal *w attr_unused, int revents attr_unused) {
-	log_info("picom is resetting...");
+	log_info("xsui-picom is resetting...");
 	ev_break(EV_A_ EVBREAK_ALL);
 }
 
 static void exit_enable(EV_P attr_unused, ev_signal *w, int revents attr_unused) {
 	session_t *ps = session_ptr(w, int_signal);
-	log_info("picom is quitting...");
+	log_info("xsui-picom is quitting...");
 	quit(ps);
 }
 
@@ -1694,73 +1694,65 @@ static void draw_callback_impl(EV_P_ session_t *ps, int revents attr_unused) {
 	if (ps->redirected && ps->o.stoppaint_force != ON) {
 		static int paint = 0;
 
-		log_verbose("Render start, frame %d", paint);
-		uint64_t after_damage_us = 0;
-		now = get_time_timespec();
-		auto render_start_us =
-		    (uint64_t)now.tv_sec * 1000000UL + (uint64_t)now.tv_nsec / 1000;
-		if (ps->backend_data->ops.device_status &&
-		    ps->backend_data->ops.device_status(ps->backend_data) !=
-		        DEVICE_STATUS_NORMAL) {
-			log_error("Device reset detected");
-			// Wait for reset to complete
-			// Although ideally the backend should return
-			// DEVICE_STATUS_NORMAL after a reset is completed, it's
-			// not always possible.
-			//
-			// According to ARB_robustness (emphasis mine):
-			//
-			//     "If a reset status other than NO_ERROR is returned
-			//     and subsequent calls return NO_ERROR, the context
-			//     reset was encountered and completed. If a reset
-			//     status is repeatedly returned, the context **may**
-			//     be in the process of resetting."
-			//
-			//  Which means it may also not be in the process of
-			//  resetting. For example on AMDGPU devices, Mesa OpenGL
-			//  always return CONTEXT_RESET after a reset has started,
-			//  completed or not.
-			//
-			//  So here we blindly wait 5 seconds and hope ourselves
-			//  best of the luck.
-			sleep(5);
-			log_info("Resetting picom after device reset");
-			reset_enable(ps->loop, NULL, 0);
-			return;
-		}
-		layout_manager_append_layout(
-		    ps->layout_manager, ps->wm, ps->root_image_generation,
-		    (ivec2){.width = ps->root_width, .height = ps->root_height});
-		bool succeeded = renderer_render(
-		    ps->renderer, ps->backend_data, ps->root_image, &ps->root_image_extent,
-		    ps->layout_manager, ps->command_builder, ps->backend_blur_context,
-		    render_start_us, ps->sync_fence, ps->o.use_damage, ps->o.monitor_repaint,
-		    ps->o.force_win_blend, ps->o.blur_background_frame,
-		    ps->o.inactive_dim_fixed, ps->o.max_brightness,
-		    ps->o.crop_shadow_to_monitor ? &ps->monitors : NULL,
-		    ps->root_pixmap_shader, ps->shaders, &after_damage_us);
-		if (!succeeded) {
-			log_fatal("Render failure");
-			abort();
-		}
-		did_render = true;
-		if (ps->next_render > 0) {
-			log_verbose("Render schedule deviation: %ld us (%s) %" PRIu64
-			            " %" PRIu64,
-			            labs((long)after_damage_us - (long)ps->next_render),
-			            after_damage_us < ps->next_render ? "early" : "late",
-			            after_damage_us, ps->next_render);
-			ps->last_schedule_delay = 0;
-			if (after_damage_us > ps->next_render) {
-				ps->last_schedule_delay = after_damage_us - ps->next_render;
+		bool needs_render = animation || ps->o.benchmark;
+		if (!needs_render) {
+			wm_stack_foreach(ps->wm, cursor) {
+				auto w = wm_ref_deref(cursor);
+				if (w && pixman_region32_not_empty(&w->damaged)) {
+					needs_render = true;
+					break;
+				}
 			}
 		}
-		log_verbose("Render end");
+		if (needs_render) {
+			log_verbose("Render start, frame %d", paint);
+			uint64_t after_damage_us = 0;
+			now = get_time_timespec();
+			auto render_start_us =
+			    (uint64_t)now.tv_sec * 1000000UL + (uint64_t)now.tv_nsec / 1000;
+			if (ps->backend_data->ops.device_status &&
+			    ps->backend_data->ops.device_status(ps->backend_data) !=
+			        DEVICE_STATUS_NORMAL) {
+				log_error("Device reset detected");
+				sleep(5);
+				log_info("Resetting xsui-picom after device reset");
+				reset_enable(ps->loop, NULL, 0);
+				return;
+			}
+			layout_manager_append_layout(
+			    ps->layout_manager, ps->wm, ps->root_image_generation,
+			    (ivec2){.width = ps->root_width, .height = ps->root_height});
+			bool succeeded = renderer_render(
+			    ps->renderer, ps->backend_data, ps->root_image, &ps->root_image_extent,
+			    ps->layout_manager, ps->command_builder, ps->backend_blur_context,
+			    render_start_us, ps->sync_fence, ps->o.use_damage, ps->o.monitor_repaint,
+			    ps->o.force_win_blend, ps->o.blur_background_frame,
+			    ps->o.inactive_dim_fixed, ps->o.max_brightness,
+			    ps->o.crop_shadow_to_monitor ? &ps->monitors : NULL,
+			    ps->root_pixmap_shader, ps->shaders, &after_damage_us);
+			if (!succeeded) {
+				log_fatal("Render failure");
+				abort();
+			}
+			did_render = true;
+			if (ps->next_render > 0) {
+				log_verbose("Render schedule deviation: %ld us (%s) %" PRIu64
+				            " %" PRIu64,
+				            labs((long)after_damage_us - (long)ps->next_render),
+				            after_damage_us < ps->next_render ? "early" : "late",
+				            after_damage_us, ps->next_render);
+				ps->last_schedule_delay = 0;
+				if (after_damage_us > ps->next_render) {
+					ps->last_schedule_delay = after_damage_us - ps->next_render;
+				}
+			}
+			log_verbose("Render end");
 
-		ps->first_frame = false;
-		paint++;
-		if (ps->o.benchmark && paint >= ps->o.benchmark) {
-			exit(0);
+			ps->first_frame = false;
+			paint++;
+			if (ps->o.benchmark && paint >= ps->o.benchmark) {
+				exit(0);
+			}
 		}
 	}
 
@@ -1922,7 +1914,7 @@ static void show_config_warning_message_box(struct options *opt) {
 	}
 
 	struct x_connection c;
-	if (spawn_picomling(&c) != 0) {
+	if (spawn_xsui_picomling(&c) != 0) {
 		return;
 	}
 
@@ -1945,7 +1937,7 @@ static void show_config_warning_message_box(struct options *opt) {
 	content->margin = 10;
 	content->scale = 0;
 	content->lines[0] = (struct ui_message_box_line){
-	    .text = "picom Warning!",
+	    .text = "xsui-picom Warning!",
 	    .color = UI_COLOR_YELLOW,
 	    .style = UI_STYLE_BOLD,
 	    .justify = UI_JUSTIFY_CENTER,
@@ -1956,7 +1948,7 @@ static void show_config_warning_message_box(struct options *opt) {
 	    "Some of your settings have generated warnings. Check the console";
 	content->lines[2] = normal_line_template;
 	content->lines[2].text =
-	    "output of picom for more information. Offending options are:";
+	    "output of xsui-picom for more information. Offending options are:";
 	content->lines[2].pad_bottom = 10;
 	struct option_name *o, *no;
 	unsigned pos = 3;
@@ -2061,7 +2053,7 @@ static session_t *session_init(int argc, char **argv, Display *dpy,
 
 	const char *basename = strrchr(argv[0], '/') ? strrchr(argv[0], '/') + 1 : argv[0];
 
-	if (strcmp(basename, "picom-inspect") == 0) {
+	if (strcmp(basename, "xsui-picom-inspect") == 0) {
 		ps->o.backend = backend_find("dummy");
 		ps->o.print_diagnostics = false;
 		ps->o.dbus = false;
@@ -2093,12 +2085,12 @@ static session_t *session_init(int argc, char **argv, Display *dpy,
 		}
 	}
 
-if (strstr(argv[0], "compton")) {
-		log_debug("This compositor has been renamed to \"picom\", the \"compton\" "
+if (strstr(argv[0], "xsui-picom")) {
+		log_debug("This compositor has been renamed to \"xsui-picom\", the \"xsui-picom\" "
                          "binary will not be installed in the future.");
 	}
 
-	log_info("xsui-picom is fork of picom compositor for SpyernetOS");
+	log_info("xsui-picom is fork of xsui-picom compositor for SpyernetOS");
 
 	ps->atoms = init_atoms(ps->c.c);
 	ps->c2_state = c2_state_new(ps->atoms);
@@ -2496,9 +2488,9 @@ static void session_run(session_t *ps) {
 }
 
 #ifdef CONFIG_FUZZER
-#define PICOM_MAIN(...) no_main(__VA_ARGS__)
+#define XSUI_PICOM_MAIN(...) no_main(__VA_ARGS__)
 #else
-#define PICOM_MAIN(...) main(__VA_ARGS__)
+#define XSUI_PICOM_MAIN(...) main(__VA_ARGS__)
 #endif
 
 /// Early initialization of logging system. To catch early logs, especially
@@ -2516,7 +2508,7 @@ static void __attribute__((constructor(201))) init_early_logging(void) {
 /**
  * The function that everybody knows.
  */
-int PICOM_MAIN(int argc, char **argv) {
+int XSUI_PICOM_MAIN(int argc, char **argv) {
 	// Set locale so window names with special characters are interpreted
 	// correctly
 	setlocale(LC_ALL, "");

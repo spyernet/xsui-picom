@@ -83,7 +83,7 @@ struct x_extensions {
 struct x_connection {
 	// Public fields
 	// These are part of the public ABI, changing these
-	// requires bumping PICOM_API_MAJOR.
+	// requires bumping XSUI_PICOM_API_MAJOR.
 	/// XCB connection.
 	xcb_connection_t *c;
 	/// Display in use.

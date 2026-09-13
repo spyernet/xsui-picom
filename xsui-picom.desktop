@@ -2,14 +2,14 @@
 Version=1.0
 Type=Application
 NoDisplay=true
-Name=picom
+Name=xsui-picom
 GenericName=X compositor
 Comment=An X compositor
 Categories=Utility;
 Keywords=compositor;composite manager;window effects;transparency;opacity;
-TryExec=picom
-Exec=picom
+TryExec=xsui-picom
+Exec=xsui-picom
 StartupNotify=false
 Terminal=false
 # Thanks to quequotion for providing this file!
-Icon=picom
+Icon=xsui-picom

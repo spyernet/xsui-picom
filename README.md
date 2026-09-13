@@ -1,19 +1,15 @@
-picom
+xsui-picom
 =====
 
-[![circleci](https://circleci.com/gh/yshui/picom.svg?style=shield)](https://circleci.com/gh/yshui/picom)
-[![codecov](https://codecov.io/gh/yshui/picom/branch/next/graph/badge.svg?token=NRSegi0Gze)](https://codecov.io/gh/yshui/picom)
-[![chat on discord](https://img.shields.io/discord/1106224720833159198?logo=discord)](https://discord.gg/SY5JJzPgME)
-
-__picom__ is a compositor for X, and a [fork of Compton](History.md).
+__xsui-picom__ is a compositor for X, and a fork of picom.
 
 **This is a development branch, bugs to be expected**
 
-You can leave your feedback or thoughts in the [discussion tab](https://github.com/yshui/picom/discussions), or chat with other users on [discord](https://discord.gg/SY5JJzPgME)!
+You can leave your feedback or thoughts in the [discussion tab](https://github.com/spyernet/xsui-picom/discussions)
 
 ## Change Log
 
-See [Releases](https://github.com/yshui/picom/releases)
+See [Releases](https://github.com/yshui/xsui-picom/releases)
 
 ## Build
 
@@ -95,17 +91,17 @@ Default install prefix is `/usr/local`, you can change it with `meson configure 
 
 All contributions are welcome!
 
-New features you think should be included in picom, a fix for a bug you found - please open a PR!
+New features you think should be included in xsui-picom, a fix for a bug you found - please open a PR!
 
-You can take a look at the [Issues](https://github.com/yshui/picom/issues).
+You can take a look at the [Issues](https://github.com/yshui/xsui-picom/issues).
 
 Contributions to the documents and wiki are also appreciated.
 
-Even if you don't want to add anything to picom, you are still helping by compiling and running this branch, and report any issue you can find.
+Even if you don't want to add anything to xsui-picom, you are still helping by compiling and running this branch, and report any issue you can find.
 
 ### Become a Collaborator
 
-Becoming a collaborator of picom requires significant time commitment. You are expected to reply to issue reports, reviewing PRs, and sometimes fix bugs or implement new feature. You won't be able to push to the main branch directly, and all you code still has to go through code review.
+Becoming a collaborator of xsui-picom requires significant time commitment. You are expected to reply to issue reports, reviewing PRs, and sometimes fix bugs or implement new feature. You won't be able to push to the main branch directly, and all you code still has to go through code review.
 
 If this sounds good to you, feel free to contact me.
 
@@ -113,9 +109,7 @@ If this sounds good to you, feel free to contact me.
 
 See [CONTRIBUTORS](CONTRIBUTORS)
 
-The README for the [original Compton project](https://github.com/chjj/compton/) can be found [here](History.md#Compton).
-
 ## Licensing
 
-picom is free software, made available under the [MIT](LICENSES/MIT) and [MPL-2.0](LICENSES/MPL-2.0) software
+xsui-picom is free software, made available under the [MIT](LICENSES/MIT) and [MPL-2.0](LICENSES/MPL-2.0) software
 licenses. See the individual source files for details.

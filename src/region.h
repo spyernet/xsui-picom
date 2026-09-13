@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <xcb/xcb.h>
 
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 
 #include "log.h"
 #include "utils/misc.h"

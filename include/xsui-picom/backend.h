@@ -9,9 +9,9 @@
 
 #include "types.h"
 
-#define PICOM_BACKEND_MAJOR (2UL)
-#define PICOM_BACKEND_MINOR (0UL)
-#define PICOM_BACKEND_MAKE_VERSION(major, minor) ((major) * 1000 + (minor))
+#define XSUI_PICOM_BACKEND_MAJOR (2UL)
+#define XSUI_PICOM_BACKEND_MINOR (0UL)
+#define XSUI_PICOM_BACKEND_MAKE_VERSION(major, minor) ((major) * 1000 + (minor))
 
 typedef pixman_region32_t region_t;
 struct shader_specification;
@@ -467,8 +467,8 @@ struct backend_base {
 	// ...
 };
 
-/// Register a new backend, `major` and `minor` should be the version of the picom backend
-/// interface. You should just pass `PICOM_BACKEND_MAJOR` and `PICOM_BACKEND_MINOR` here.
+/// Register a new backend, `major` and `minor` should be the version of the xsui-picom backend
+/// interface. You should just pass `XSUI_PICOM_BACKEND_MAJOR` and `XSUI_PICOM_BACKEND_MINOR` here.
 /// `name` is the name of the backend, `init` is the function to initialize the backend,
 /// `can_present` should be true if the backend can present the back buffer to the screen,
 /// false otherwise (e.g. if the backend does off screen rendering, etc.)

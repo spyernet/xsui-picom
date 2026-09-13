@@ -4,7 +4,7 @@
 #include <xcb/sync.h>
 #include <xcb/xcb.h>
 
-#include <picom/types.h>
+#include <xsui-picom/types.h>
 
 #include "common.h"
 #include "compiler.h"
@@ -23,20 +23,20 @@ static struct backend_info {
 	bool can_present;
 } *backend_registry = NULL;
 
-PICOM_PUBLIC_API bool
+XSUI_PICOM_PUBLIC_API bool
 backend_register(uint64_t major, uint64_t minor, const char *name,
                  struct backend_base *(*init)(session_t *ps, xcb_window_t target),
                  bool can_present) {
-	if (major != PICOM_BACKEND_MAJOR) {
+	if (major != XSUI_PICOM_BACKEND_MAJOR) {
 		log_error("Backend %s has incompatible major version %" PRIu64
 		          ", expected %lu",
-		          name, major, PICOM_BACKEND_MAJOR);
+		          name, major, XSUI_PICOM_BACKEND_MAJOR);
 		return false;
 	}
-	if (minor > PICOM_BACKEND_MINOR) {
+	if (minor > XSUI_PICOM_BACKEND_MINOR) {
 		log_error("Backend %s has incompatible minor version %" PRIu64
 		          ", expected %lu",
-		          name, minor, PICOM_BACKEND_MINOR);
+		          name, minor, XSUI_PICOM_BACKEND_MINOR);
 		return false;
 	}
 	struct backend_info *info = NULL;
