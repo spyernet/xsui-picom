@@ -492,6 +492,7 @@ static const struct picom_option picom_options[] = {
     [293] = {"benchmark"                   , INTEGER(benchmark, 0, INT_MAX)                 , "Benchmark mode. Repeatedly paint until reaching the specified cycles."},
     [302] = {"resize-damage"               , WARN_DEPRECATED(INTEGER(resize_damage, INT_MIN, INT_MAX))},       // only used by legacy backends
     [309] = {"unredir-if-possible-delay"   , INTEGER(unredir_if_possible_delay, 0, INT_MAX) , "Delay before unredirecting the window, in milliseconds. Defaults to 0."},
+    [311] = {"game-mode"                  , ENABLE(game_mode)                                , "Enable game mode: unredirect and disable blur when a fullscreen window is detected."},
     [310] = {"write-pid-path"              , NAMED_STRING(write_pid_path, "PATH")           , "Write process ID to a file."},
     [322] = {"log-file"                    , STRING(logpath)                                , "Path to the log file."},
     [326] = {"max-brightness"              , FLOAT(max_brightness, 0, 1)                    , "Dims windows which average brightness is above this threshold. Requires "
@@ -519,8 +520,9 @@ static const struct picom_option picom_options[] = {
     [296] = {"blur-background-exclude"     , RULES(blur_background_blacklist)     , "Exclude conditions for background blur."},
     [300] = {"fade-exclude"                , RULES(fade_blacklist)                , "Exclude conditions for fading."},
     [306] = {"paint-exclude"               , RULES(paint_blacklist)               , NULL},
-    [308] = {"unredir-if-possible-exclude" , RULES(unredir_if_possible_blacklist) , "Conditions of windows that shouldn't be considered full-screen for "
-                                                                                    "unredirecting screen."},
+[308] = {"unredir-if-possible-exclude" , RULES(unredir_if_possible_blacklist) , "Conditions of windows that shouldn't be considered full-screen for "
+                                                                                     "unredirecting screen."},
+    [336] = {"game-class"                   , RULES(game_class_blacklist)         , "Specify a list of conditions of windows to consider as games for game mode."},
     [334] = {"rounded-corners-exclude"     , RULES(rounded_corners_blacklist)     , "Exclude conditions for rounded corners."},
     [335] = {"clip-shadow-above"           , RULES(shadow_clip_list)              , "Specify a list of conditions of windows to not paint a shadow over, such "
                                                                                     "as a dock window."},
@@ -923,6 +925,7 @@ bool get_cfg(options_t *opt, int argc, char *const *argv) {
 	if (opt->fading_enable) {
 		generate_fading_config(opt);
 	}
+	generate_ui_animations(opt);
 	return true;
 }
 
@@ -937,6 +940,7 @@ void options_postprocess_c2_lists(struct c2_state *state, struct x_connection *c
 	}
 
 	if (!(c2_list_postprocess(state, c->c, &option->unredir_if_possible_blacklist) &&
+	      c2_list_postprocess(state, c->c, &option->game_class_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->paint_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->shadow_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->shadow_clip_list) &&
@@ -973,6 +977,7 @@ void options_destroy(struct options *options) {
 	c2_list_free(&options->opacity_rules, NULL);
 	c2_list_free(&options->paint_blacklist, NULL);
 	c2_list_free(&options->unredir_if_possible_blacklist, NULL);
+	c2_list_free(&options->game_class_blacklist, NULL);
 	c2_list_free(&options->rounded_corners_blacklist, NULL);
 	c2_list_free(&options->corner_radius_rules, NULL);
 	c2_list_free(&options->window_shader_fg_rules, free);

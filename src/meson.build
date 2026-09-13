@@ -142,8 +142,8 @@ libtools = static_library(
 	build_by_default: false,
 )
 
-picom = executable(
-	'picom',
+xsui_picom = executable(
+	'xsui-picom',
 	srcs,
 	c_args: cflags,
 	dependencies: [base_deps, deps, test_h_dep] + dl_dep,
@@ -154,10 +154,10 @@ picom = executable(
 )
 
 if get_option('unittest')
-	test('picom unittest', picom, args: ['--unittest'])
+	test('xsui-picom unittest', xsui_picom, args: ['--unittest'])
 endif
 
-install_symlink('picom-inspect', install_dir: 'bin', pointing_to: 'picom')
+install_symlink('xsui-picom-inspect', install_dir: 'bin', pointing_to: 'xsui-picom')
 
 if cc.has_argument('-fsanitize=fuzzer')
 	c2_fuzz = executable(

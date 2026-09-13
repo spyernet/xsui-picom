@@ -652,6 +652,8 @@ bool parse_config(options_t *opt, const char *config_file) {
 	    .detect_rounded_corners = false,
 	    .resize_damage = 0,
 	    .unredir_if_possible = false,
+	    .game_mode = false,
+	    .game_class_blacklist = NULL,
 	    .unredir_if_possible_blacklist = NULL,
 	    .unredir_if_possible_delay = 0,
 	    .redirected_force = UNSET,
@@ -727,6 +729,7 @@ bool parse_config(options_t *opt, const char *config_file) {
 
 	list_init_head(&opt->included_config_files);
 	list_init_head(&opt->unredir_if_possible_blacklist);
+	list_init_head(&opt->game_class_blacklist);
 	list_init_head(&opt->paint_blacklist);
 	list_init_head(&opt->shadow_blacklist);
 	list_init_head(&opt->shadow_clip_list);

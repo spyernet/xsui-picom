@@ -1,0 +1,1 @@
+bro now make it very optimized for potato computers no features or visuals loss

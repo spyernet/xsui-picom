@@ -851,10 +851,27 @@ static void win_determine_invert_color(session_t *ps, struct win *w) {
 /**
  * Determine if a window should have background blurred.
  */
+static bool win_is_game(session_t *ps, struct win *w) {
+	if (!ps->o.game_mode) {
+		return false;
+	}
+	// If no game-class rules are configured, fall back to fullscreen detection.
+	if (list_is_empty(&ps->o.game_class_blacklist)) {
+		return w->is_fullscreen;
+	}
+	return c2_match(ps->c2_state, w, &ps->o.game_class_blacklist, NULL);
+}
+
 static void win_determine_blur_background(session_t *ps, struct win *w) {
 	log_debug("Determining blur-background of window %#010x (%s)", win_id(w), w->name);
 	w->options.blur_background = TRI_UNKNOWN;
 	if (w->a.map_state != XCB_MAP_STATE_VIEWABLE) {
+		return;
+	}
+
+	if (win_is_game(ps, w)) {
+		log_debug("Blur background disabled for game window %#010x", win_id(w));
+		w->options.blur_background = TRI_FALSE;
 		return;
 	}
 

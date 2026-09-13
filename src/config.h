@@ -335,6 +335,11 @@ typedef struct options {
 	/// Whether to unredirect all windows if a full-screen opaque window
 	/// is detected.
 	bool unredir_if_possible;
+	/// Whether to enable game mode: unredirect and disable blur when a
+	/// game window is detected.
+	bool game_mode;
+	/// List of conditions of windows to consider as games for game mode.
+	struct list_node game_class_blacklist;
 	/// List of conditions of windows to ignore as a full-screen window
 	/// when determining if a window could be unredirected.
 	struct list_node unredir_if_possible_blacklist;
@@ -583,4 +588,7 @@ static inline void log_warn_both_style_of_rules(struct options *opt, const char 
 }
 enum animation_trigger parse_animation_trigger(const char *trigger);
 
-// vim: set noet sw=8 ts=8 :
+/// Generate animation script for legacy fading options
+void generate_fading_config(struct options *opt);
+/// Generate default fluid UI animations for open/close/geometry changes.
+void generate_ui_animations(struct options *opt);

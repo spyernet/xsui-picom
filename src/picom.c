@@ -69,6 +69,7 @@
 #include "vblank.h"
 #include "wm/defs.h"
 #include "wm/wm.h"
+#include "wm/win.h"
 #include "x.h"
 
 /// Get session_t pointer from a pointer to a member of session_t
@@ -783,6 +784,12 @@ static bool paint_preprocess(session_t *ps, bool *animation, struct win **out_bo
 		    !ps->o.force_win_blend && w->is_fullscreen &&
 		    (window_options.unredir == WINDOW_UNREDIR_WHEN_POSSIBLE ||
 		     window_options.unredir == WINDOW_UNREDIR_WHEN_POSSIBLE_ELSE_TERMINATE)) {
+			unredir_possible = true;
+		}
+
+		// Game mode: unredirect whenever a fullscreen window is detected,
+		// giving the game full GPU access for a boost.
+		if (ps->o.game_mode && w->is_fullscreen && is_highest) {
 			unredir_possible = true;
 		}
 
@@ -2082,10 +2089,12 @@ static session_t *session_init(int argc, char **argv, Display *dpy,
 		}
 	}
 
-	if (strstr(argv[0], "compton")) {
+if (strstr(argv[0], "compton")) {
 		log_warn("This compositor has been renamed to \"picom\", the \"compton\" "
-		         "binary will not be installed in the future.");
+                         "binary will not be installed in the future.");
 	}
+
+	log_info("xsui-picom is fork of picom compositor for SpyernetOS");
 
 	ps->atoms = init_atoms(ps->c.c);
 	ps->c2_state = c2_state_new(ps->atoms);

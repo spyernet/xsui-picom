@@ -602,6 +602,74 @@ void generate_fading_config(struct options *opt) {
 	dynarr_extend_from(opt->all_scripts, scripts, number_of_scripts);
 }
 
+/// Generate default fluid UI animations for open/close/geometry changes.
+/// Always enabled by default — no flag needed.
+void generate_ui_animations(struct options *opt) {
+	struct script *scripts[4];
+	unsigned number_of_scripts = 0;
+
+	// Open animation: scale from 0.95 to 1 with ease
+	const char *open_script =
+	    "opacity = { duration = 0.15; start = \"window-raw-opacity-before\"; end = \"window-raw-opacity\"; };"
+	    "scale-x = { curve = \"cubic-bezier(0.22, 0.02, 0.76, 0.36)\"; duration = 0.15; start = 0.95; end = 1; };"
+	    "scale-y = \"scale-x\";"
+	    "offset-x = \"(1 - scale-x) / 2 * window-width\";"
+	    "offset-y = \"(1 - scale-y) / 2 * window-height\";"
+	    "shadow-opacity = \"opacity\";";
+	struct win_script open = {.is_generated = true};
+	BUG_ON(!compile_win_script_from_string(&open, open_script));
+	if (opt->animations[ANIMATION_TRIGGER_OPEN].script == NULL &&
+	    !opt->no_fading_openclose) {
+		if (set_animation(opt->animations, 1 << ANIMATION_TRIGGER_OPEN, open, 0)) {
+			scripts[number_of_scripts++] = open.script;
+		} else {
+			script_free(open.script);
+		}
+	}
+
+	// Close animation: scale from 1 to 0.95 with ease
+	const char *close_script =
+	    "opacity = { duration = 0.15; start = \"window-raw-opacity-before\"; end = \"window-raw-opacity\"; };"
+	    "scale-x = { curve = \"cubic-bezier(0.21, 0.02, 0.76, 0.36)\"; duration = 0.15; start = 1; end = 0.95; };"
+	    "scale-y = \"scale-x\";"
+	    "offset-x = \"(1 - scale-x) / 2 * window-width\";"
+	    "offset-y = \"(1 - scale-y) / 2 * window-height\";"
+	    "shadow-opacity = \"opacity\";";
+	struct win_script close = {.is_generated = true};
+	BUG_ON(!compile_win_script_from_string(&close, close_script));
+	if (opt->animations[ANIMATION_TRIGGER_CLOSE].script == NULL &&
+	    !opt->no_fading_openclose) {
+		if (set_animation(opt->animations, 1 << ANIMATION_TRIGGER_CLOSE, close, 0)) {
+			scripts[number_of_scripts++] = close.script;
+		} else {
+			script_free(close.script);
+		}
+	}
+
+	// Geometry change: smooth scale/offset animation
+	const char *geom_script =
+	    "scale-x = { curve = \"cubic-bezier(0.07, 0.65, 0, 1)\"; duration = 0.2; start = \"window-width-before / window-width\"; end = 1; };"
+	    "scale-y = \"scale-x\";"
+	    "offset-x = { curve = \"cubic-bezier(0.07, 0.65, 0, 1)\"; duration = 0.2; start = \"window-x-before - window-x\"; end = 0; };"
+	    "offset-y = { curve = \"cubic-bezier(0.07, 0.65, 0, 1)\"; duration = 0.2; start = \"window-y-before - window-y\"; end = 0; };"
+	    "shadow-offset-x = \"offset-x\";"
+	    "shadow-offset-y = \"offset-y\";";
+	struct win_script geom = {.is_generated = true};
+	BUG_ON(!compile_win_script_from_string(&geom, geom_script));
+	if (opt->animations[ANIMATION_TRIGGER_SIZE].script == NULL &&
+	    opt->animations[ANIMATION_TRIGGER_POSITION].script == NULL) {
+		uint64_t triggers = (1 << ANIMATION_TRIGGER_SIZE) | (1 << ANIMATION_TRIGGER_POSITION);
+		if (set_animation(opt->animations, triggers, geom, 0)) {
+			scripts[number_of_scripts++] = geom.script;
+		} else {
+			script_free(geom.script);
+		}
+	}
+
+	log_debug("Generated %d scripts for UI animations.", number_of_scripts);
+	dynarr_extend_from(opt->all_scripts, scripts, number_of_scripts);
+}
+
 static enum window_unredir_option parse_unredir_option(config_setting_t *setting) {
 	if (config_setting_type(setting) == CONFIG_TYPE_BOOL) {
 		auto bval = config_setting_get_bool(setting);
@@ -1086,6 +1154,8 @@ bool parse_config_libconfig(options_t *opt, const char *config_file) { /*NOLINT(
 	lcfg_lookup_bool(&cfg, "use-ewmh-active-win", &opt->use_ewmh_active_win);
 	// --unredir-if-possible
 	lcfg_lookup_bool(&cfg, "unredir-if-possible", &opt->unredir_if_possible);
+	// --game-mode
+	lcfg_lookup_bool(&cfg, "game-mode", &opt->game_mode);
 	// --unredir-if-possible-delay
 	if (config_lookup_int(&cfg, "unredir-if-possible-delay", &ival)) {
 		if (ival < 0) {
@@ -1124,6 +1194,7 @@ bool parse_config_libconfig(options_t *opt, const char *config_file) { /*NOLINT(
 	    {"blur-background-exclude", offsetof(struct options, blur_background_blacklist)},
 	    {"unredir-if-possible-exclude",
 	     offsetof(struct options, unredir_if_possible_blacklist)},
+	    {"game-class", offsetof(struct options, game_class_blacklist)},
 	    {"rounded-corners-exclude", offsetof(struct options, rounded_corners_blacklist)},
 	    {"corner-radius-rules", offsetof(struct options, corner_radius_rules),
 	     parse_numeric_prefix, NULL, (int[]){0, INT_MAX}},
