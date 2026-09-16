@@ -523,6 +523,11 @@ static const struct xsui_picom_option xsui_picom_options[] = {
 [308] = {"unredir-if-possible-exclude" , RULES(unredir_if_possible_blacklist) , "Conditions of windows that shouldn't be considered full-screen for "
                                                                                      "unredirecting screen."},
     [336] = {"game-class"                   , RULES(game_class_blacklist)         , "Specify a list of conditions of windows to consider as games for game mode."},
+	[346] = {"fullscreen-blacklist"         , RULES(fullscreen_blacklist)         , "Specify a list of conditions of windows that should not be considered "
+	                                                                                    "full-screen even when they set the EWMH fullscreen state or cover "
+	                                                                                    "the whole screen. Useful for full-screen launcher apps that "
+	                                                                                    "should keep the compositor running so they can be painted with "
+	                                                                                    "transparency/blur effects."},
     [334] = {"rounded-corners-exclude"     , RULES(rounded_corners_blacklist)     , "Exclude conditions for rounded corners."},
     [335] = {"clip-shadow-above"           , RULES(shadow_clip_list)              , "Specify a list of conditions of windows to not paint a shadow over, such "
                                                                                     "as a dock window."},
@@ -939,6 +944,7 @@ void options_postprocess_c2_lists(struct c2_state *state, struct x_connection *c
 
 	if (!(c2_list_postprocess(state, c->c, &option->unredir_if_possible_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->game_class_blacklist) &&
+	      c2_list_postprocess(state, c->c, &option->fullscreen_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->paint_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->shadow_blacklist) &&
 	      c2_list_postprocess(state, c->c, &option->shadow_clip_list) &&
@@ -976,6 +982,7 @@ void options_destroy(struct options *options) {
 	c2_list_free(&options->paint_blacklist, NULL);
 	c2_list_free(&options->unredir_if_possible_blacklist, NULL);
 	c2_list_free(&options->game_class_blacklist, NULL);
+	c2_list_free(&options->fullscreen_blacklist, NULL);
 	c2_list_free(&options->rounded_corners_blacklist, NULL);
 	c2_list_free(&options->corner_radius_rules, NULL);
 	c2_list_free(&options->window_shader_fg_rules, free);

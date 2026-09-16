@@ -118,6 +118,8 @@ void inspect_dump_window(const struct c2_state *state, const struct options *opt
 		c2_match_and_log(&opts->blur_background_blacklist, state, w, false);
 		printf("Checking " BOLD("unredir-if-possible-exclude") ":\n");
 		c2_match_and_log(&opts->unredir_if_possible_blacklist, state, w, false);
+		printf("Checking " BOLD("fullscreen-blacklist") ":\n");
+		c2_match_and_log(&opts->fullscreen_blacklist, state, w, false);
 		printf("Checking " BOLD("rounded-corners-exclude") ":\n");
 		c2_match_and_log(&opts->rounded_corners_blacklist, state, w, false);
 

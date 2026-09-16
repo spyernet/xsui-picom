@@ -496,6 +496,12 @@ typedef struct options {
 
 	// Don't use EWMH to detect fullscreen applications
 	bool no_ewmh_fullscreen;
+	/// List of conditions of windows that should not be considered
+	/// fullscreen, even if they match the EWMH fullscreen state or cover
+	/// the whole screen. This is useful for full-screen launcher apps
+	/// (e.g. SmartSlide) that should keep the compositor running so they
+	/// can be painted with transparency/blur effects.
+	struct list_node fullscreen_blacklist;
 
 	// Make transparent windows clip other windows, instead of blending on top of
 	// them

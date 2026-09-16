@@ -10,6 +10,7 @@
 * New variables "window-blur-opacity-before", and "window-blur-opacity" are now available in animation scripts. (#919)
 * New per-window option `blur-opacity` can now be used in `rules`. (#919)
 * Macro definitions can now be specified when setting `shader` in window rules. (#1066)
+* New `fullscreen-blacklist` config option lets you exclude windows from being considered fullscreen (so the compositor keeps running and painting them). The obsolete system apps SmartSlide and sui-panel are hardcoded so they are never considered fullscreen.
 
 ## Deprecations
 

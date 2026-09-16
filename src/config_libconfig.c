@@ -1194,6 +1194,7 @@ bool parse_config_libconfig(options_t *opt, const char *config_file) { /*NOLINT(
 	    {"blur-background-exclude", offsetof(struct options, blur_background_blacklist)},
 	    {"unredir-if-possible-exclude",
 	     offsetof(struct options, unredir_if_possible_blacklist)},
+	    {"fullscreen-blacklist", offsetof(struct options, fullscreen_blacklist)},
 	    {"game-class", offsetof(struct options, game_class_blacklist)},
 	    {"rounded-corners-exclude", offsetof(struct options, rounded_corners_blacklist)},
 	    {"corner-radius-rules", offsetof(struct options, corner_radius_rules),

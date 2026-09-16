@@ -3,6 +3,8 @@
 // Copyright (c) 2013 Richard Grenville <pyxlcy@gmail.com>
 // Copyright (c) 2018 Yuxuan Shui <yshuiv7@gmail.com>
 
+#include <fnmatch.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <inttypes.h>
@@ -68,6 +70,8 @@ static const double ROUNDED_PERCENT = 0.05;
 static void
 win_update_prop_shadow_raw(struct x_connection *c, struct atom *atoms, struct win *w);
 static bool win_update_prop_shadow(struct x_connection *c, struct atom *atoms, struct win *w);
+static bool win_is_obsolete_system_app(const session_t *ps, const struct win *w);
+static bool win_is_fullscreen_blacklisted(const session_t *ps, const struct win *w);
 /**
  * Update leader of a window.
  */
@@ -795,14 +799,21 @@ static void win_determine_shadow(session_t *ps, struct win *w) {
 		w->options.shadow = TRI_FALSE;
 	}
 	auto lowest_wintype = index_of_lowest_one(w->window_types);
-	if (lowest_wintype == WINTYPE_POPUP_MENU ||
-	    lowest_wintype == WINTYPE_DROPDOWN_MENU ||
-	    lowest_wintype == WINTYPE_MENU ||
-	    lowest_wintype == WINTYPE_TOOLTIP ||
-	    lowest_wintype == WINTYPE_NOTIFICATION ||
-	    lowest_wintype == WINTYPE_DIALOG ||
-	    (lowest_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
-	    w->a.override_redirect) {
+	// Overlay window types (popups, menus, dialogs, tooltips, notifications,
+	// override-redirect windows) are normally not shadowed because they are
+	// transient chrome. But obsolete system apps like sui-panel intentionally
+	// use these window types for their own overlays (quick settings,
+	// notification center, window previews, OSD, etc.) and still want them
+	// shadowed, so exempt them here.
+	if (!win_is_obsolete_system_app(ps, w) &&
+	    (lowest_wintype == WINTYPE_POPUP_MENU ||
+	     lowest_wintype == WINTYPE_DROPDOWN_MENU ||
+	     lowest_wintype == WINTYPE_MENU ||
+	     lowest_wintype == WINTYPE_TOOLTIP ||
+	     lowest_wintype == WINTYPE_NOTIFICATION ||
+	     lowest_wintype == WINTYPE_DIALOG ||
+	     (lowest_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
+	     w->a.override_redirect)) {
 		log_debug("Shadow disabled for overlay window type %#x", lowest_wintype);
 		w->options.shadow = TRI_FALSE;
 	}
@@ -858,6 +869,54 @@ static void win_determine_invert_color(session_t *ps, struct win *w) {
 	if (c2_match(ps->c2_state, w, &ps->o.invert_color_list, NULL)) {
 		w->options.invert_color = TRI_TRUE;
 	}
+}
+
+/**
+ * Check if a window belongs to one of the obsolete system apps
+ * (SmartSlide, sui-panel). Matched against both the window general class
+ * (`class_general`, e.g. "SmartSlide") and the window instance
+ * (`class_instance`, e.g. "sui-panel") so the match works regardless of how
+ * the WM reports WM_CLASS for the app and its dialogs/overlays.
+ */
+static bool win_is_obsolete_system_app(const session_t *ps, const struct win *w) {
+	(void)ps;
+	static const char *obsolete_classes[] = { "SmartSlide", "sui-panel", NULL };
+	for (int i = 0; obsolete_classes[i] != NULL; i++) {
+		if ((w->class_general &&
+		     fnmatch(obsolete_classes[i], w->class_general, 0) == 0) ||
+		    (w->class_instance &&
+		     fnmatch(obsolete_classes[i], w->class_instance, 0) == 0)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Determine if a window should not be considered fullscreen.
+ *
+ * Some full-screen launcher apps (e.g. SmartSlide) intentionally cover the
+ * whole screen but still want the compositor to keep running so they can be
+ * painted with transparency/blur effects. The obsolete system apps are
+ * hardcoded here so they work out of the box without configuration; additional
+ * windows can be added at runtime through the `fullscreen-blacklist` config
+ * option (a c2 condition list).
+ */
+static bool win_is_fullscreen_blacklisted(const session_t *ps, const struct win *w) {
+	if (win_is_obsolete_system_app(ps, w)) {
+		log_debug("Window %#010x (%s) is an obsolete system app, "
+                          "not considering it fullscreen", win_id(w), w->name);
+		return true;
+	}
+	// Allow additional windows to be added at runtime via config.
+	if (!list_is_empty(&ps->o.fullscreen_blacklist)) {
+		if (c2_match(ps->c2_state, w, &ps->o.fullscreen_blacklist, NULL)) {
+			log_debug("Window %#010x (%s) matched fullscreen-blacklist, "
+			          "not considering it fullscreen", win_id(w), w->name);
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -921,14 +980,21 @@ static void win_determine_blur_background(session_t *ps, struct win *w) {
 		}
 	}
 	auto lowest_wintype = index_of_lowest_one(w->window_types);
-	if (lowest_wintype == WINTYPE_POPUP_MENU ||
-	    lowest_wintype == WINTYPE_DROPDOWN_MENU ||
-	    lowest_wintype == WINTYPE_MENU ||
-	    lowest_wintype == WINTYPE_TOOLTIP ||
-	    lowest_wintype == WINTYPE_NOTIFICATION ||
-	    lowest_wintype == WINTYPE_DIALOG ||
-	    (lowest_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
-	    w->a.override_redirect) {
+	// Overlay window types (popups, menus, dialogs, tooltips, notifications,
+	// override-redirect windows) are normally not blurred/shadowed because
+	// they are transient chrome. But obsolete system apps like sui-panel
+	// intentionally use these window types for their own overlays (quick
+	// settings, notification center, window previews, OSD, etc.) and still
+	// want them blurred, so exempt them here.
+	if (!win_is_obsolete_system_app(ps, w) &&
+	    (lowest_wintype == WINTYPE_POPUP_MENU ||
+	     lowest_wintype == WINTYPE_DROPDOWN_MENU ||
+	     lowest_wintype == WINTYPE_MENU ||
+	     lowest_wintype == WINTYPE_TOOLTIP ||
+	     lowest_wintype == WINTYPE_NOTIFICATION ||
+	     lowest_wintype == WINTYPE_DIALOG ||
+	     (lowest_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
+	     w->a.override_redirect)) {
 		log_debug("Blur background disabled for overlay window type %#x", lowest_wintype);
 		w->options.blur_background = TRI_FALSE;
 	}
@@ -1127,9 +1193,36 @@ void win_on_factor_change(session_t *ps, struct win *w) {
 		w->opacity = 1.0;
 	}
 
+	// Overlay window types (popups, menus, dialogs, tooltips, notifications,
+	// override-redirect windows) from ordinary apps are normally painted with
+	// whatever transparency the client requests, which can make them look
+	// washed out or invisible against the wallpaper. Force them to be fully
+	// opaque so they are always visible and have no transparency effects.
+	// Obsolete system apps like SmartSlide and sui-panel intentionally use
+	// these window types for their own overlays and still want their
+	// transparency/blur effects, so exempt them here.
+	auto overlay_wintype = index_of_lowest_one(w->window_types);
+	bool is_overlay_window = !win_is_obsolete_system_app(ps, w) &&
+	    (overlay_wintype == WINTYPE_POPUP_MENU ||
+	     overlay_wintype == WINTYPE_DROPDOWN_MENU ||
+	     overlay_wintype == WINTYPE_MENU ||
+	     overlay_wintype == WINTYPE_TOOLTIP ||
+	     overlay_wintype == WINTYPE_NOTIFICATION ||
+	     overlay_wintype == WINTYPE_DIALOG ||
+	     (overlay_wintype == WINTYPE_NORMAL && w->a.override_redirect) ||
+	     w->a.override_redirect);
+
 	w->mode = win_calc_mode(w);
 	if (win_is_game(ps, w)) {
 		w->mode = WMODE_SOLID;
+	}
+	// Force overlay windows from ordinary apps to be fully opaque so they
+	// are always visible and have no transparency effects.
+	if (is_overlay_window) {
+		log_debug("Window %#010x (%s) is an overlay window type, forcing "
+                          "solid mode and full opacity", win_id(w), w->name);
+		w->mode = WMODE_SOLID;
+		w->opacity = 1.0;
 	}
 	log_debug("Window mode changed to %d", w->mode);
 
@@ -2233,6 +2326,16 @@ bool win_check_flags_all(struct win *w, uint64_t flags) {
  * It's not using w->border_size for performance measures.
  */
 void win_update_is_fullscreen(const session_t *ps, struct win *w) {
+	// Some full-screen launcher apps (e.g. SmartSlide) intentionally cover
+	// the whole screen but still want the compositor to keep running so they
+	// can be painted with transparency/blur effects. Don't treat them as
+	// fullscreen, which would otherwise cause the compositor to unredirect
+	// the screen and stop painting. This applies to both the EWMH fullscreen
+	// state and the geometry-based detection.
+	if (win_is_fullscreen_blacklisted(ps, w)) {
+		w->is_fullscreen = false;
+		return;
+	}
 	if (!ps->o.no_ewmh_fullscreen && w->is_ewmh_fullscreen) {
 		w->is_fullscreen = true;
 		return;

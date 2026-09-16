@@ -14,6 +14,7 @@ xsui-picom
 *.o
 *.d
 build/
+build-release/
 bin/
 priv/
 compile_commands.json

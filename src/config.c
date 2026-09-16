@@ -724,12 +724,14 @@ bool parse_config(options_t *opt, const char *config_file) {
 	    .rounded_corners_blacklist = NULL,
 
 	    .rules = NULL,
+	    .fullscreen_blacklist = NULL,
 	};
 	// clang-format on
 
 	list_init_head(&opt->included_config_files);
 	list_init_head(&opt->unredir_if_possible_blacklist);
 	list_init_head(&opt->game_class_blacklist);
+	list_init_head(&opt->fullscreen_blacklist);
 	list_init_head(&opt->paint_blacklist);
 	list_init_head(&opt->shadow_blacklist);
 	list_init_head(&opt->shadow_clip_list);
